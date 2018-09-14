@@ -31,7 +31,7 @@ public class Player implements matchup.sim.Player {
     }
 
     public List<Integer> getSkills() {
-		Integer s[] = {6,6,6,6,6,8,8,8,8,8,4,4,4,4,4};
+		Integer s[] = {9,9,9,9,9,8,8,8,8,8,1,1,1,1,1};
 
 		skills = new ArrayList<Integer>(Arrays.asList(s));
 
@@ -42,9 +42,9 @@ public class Player implements matchup.sim.Player {
 	    Integer rows[][];
 
         if (isHome) {
-		    rows = new Integer[][] {{8,8,6,4,4},{8,8,6,6,4},{8,6,6,4,4}};
+		    rows = new Integer[][] {{9,9,8,8,1},{9,9,8,1,1},{9,8,8,1,1}};
 	    } else {
-		    rows = new Integer[][] {{6,6,6,6,6},{8,8,8,8,8},{4,4,4,4,4}};
+		    rows = new Integer[][] {{9,9,9,9,9},{8,8,8,8,8},{1,1,1,1,1}};
 	    }
 	
 		for (int i = 0; i < 3; ++i) {

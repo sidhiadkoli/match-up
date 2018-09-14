@@ -26,6 +26,8 @@ public class Player implements matchup.sim.Player {
     }
 
 	public List<Integer> getSkills() {
+        skills.clear();
+        
 		for (int i=0; i<7; ++i) {
 			int x = rand.nextInt(11) + 1;
 			skills.add(x);
@@ -72,6 +74,6 @@ public class Player implements matchup.sim.Player {
 
     public void clear() {
     	availableRows.clear();
-    	for (int i=0; i<3; ++i) availableRows.add(i);
+    	for (int i=0; i<3; ++i) { availableRows.add(i); }
     }
 }
