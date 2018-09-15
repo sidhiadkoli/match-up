@@ -17,6 +17,7 @@ public class Player implements matchup.sim.Player {
 	private Random rand;
 
 	private boolean isHome;
+	private int roundNum;
 	
 	public Player() {
 		rand = new Random();
@@ -52,33 +53,19 @@ public class Player implements matchup.sim.Player {
 		}
 
 		this.isHome = isHome;
+		this.roundNum = 0;
 	    return distribution;
 	}
 
     public List<Integer> playRound(List<Integer> opponentRound) {
-    	//int n = rand.nextInt(availableRows.size());    	
-
-    	List<Integer> curRow = distribution.get(availableRows.get(0));
-		availableRows.remove(0);
-
-		// for (int elt : curRow) {
-  //   		System.out.print(elt + " ");
-  //   	}
-
 		if (isHome) {
-			this.maxScore = Integer.MIN_VALUE;
-			this.maxPermute = new ArrayList<Integer>(Arrays.asList(0,0,0,0,0));
-			findOptimalPermutation(new ArrayList<Integer>(), curRow, opponentRound);
+            availableRows.remove(lineToUse(opponentRound));
 			return maxPermute;
+		} else {
+			List<Integer> toUse = distribution.get(availableRows.get(0));
+			availableRows.remove(0);
+			return toUse;
 		}
-
-		return curRow;
-
-		//List<Integer> round = ArrayList<Integer>();
-
-    	//Collections.shuffle(round);
-
-    	
     }
 
     public void clear() {
@@ -88,16 +75,50 @@ public class Player implements matchup.sim.Player {
 	    distribution.clear();
     }
 
+    private int lineToUse(List<Integer> opponentLine) {
+    	this.maxScore = Integer.MIN_VALUE;
+    	this.maxPermute = new ArrayList<Integer>(Arrays.asList(0,0,0,0,0));
+    	
+    	List<Integer> scores = new ArrayList<Integer>(3);
+    	List<List<Integer>> permutes = new ArrayList<List<Integer>>(3); 
+
+    	for (int rowNum : availableRows) {
+            List<Integer> curLine = distribution.get(rowNum);
+            findOptimalPermutation(new ArrayList<Integer>(), curLine, opponentLine);
+            scores.add(this.maxScore);
+            permutes.add(new ArrayList(this.maxPermute));
+    	}
+
+        int bestLine = 0;
+        double bestScore = Double.MIN_VALUE;
+
+    	for (int i = 0; i < availableRows.size(); ++i) {
+            List<Integer> curLine = permutes.get(i);
+
+            int sum = 0;
+            for (int elt: curLine) {sum += elt;}
+            double score = scores.get(i) / (double)sum;
+
+            if(score > bestScore) {
+            	bestScore = score;
+            	bestLine = i;
+            	this.maxPermute = permutes.get(i);
+            }
+    	}
+
+    	return bestLine;
+    }
+
     private int calculateScore(List<Integer> myLine, List<Integer> opponentLine) {
-        int score = 0;
+        int tally = 0;
 
         for (int i = 0; i < myLine.size(); ++i) {
         	int diff = myLine.get(i) - opponentLine.get(i);
-            if (diff >= 3) { ++score; }
-            else if (diff <= -3) { --score; } 
+            if (diff >= 3) { ++tally; }
+            else if (diff <= -3) { --tally; } 
         }
 
-        return score;
+        return tally;
     }
 
     private void findOptimalPermutation(List<Integer> myList, List<Integer> myLine, List<Integer> opponentList) {
@@ -111,17 +132,11 @@ public class Player implements matchup.sim.Player {
         	for (int i = 0; i < myLine.size(); ++i) {
 	            List<Integer> tMyList = new ArrayList<Integer>(myList);
 	            List<Integer> tMyLine = new ArrayList<Integer>(myLine);
-	            //System.out.print("Hi");
 
 	            tMyList.add(myLine.get(i));
 	            tMyLine.remove(i);
-
-	            //for (int elt : tMyList) {System.out.print(elt + " "); }
-	            //System.out.print('\n');
-	            //for (int elt : tMyLine) {System.out.print(elt + " "); }
-
 	            findOptimalPermutation(tMyList, tMyLine, opponentList);
-	        }        
+	        }
         }
     }
 }
