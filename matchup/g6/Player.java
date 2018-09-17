@@ -26,13 +26,18 @@ public class Player implements matchup.sim.Player {
     }
 
     public List<Integer> getSkills() {
-        for (int i = 0; i < 7; ++i) {
-            int x = rand.nextInt(11) + 1;
-            skills.add(x);
-            skills.add(12 - x);
-        }
+    	// skill distribution modeled after Group 5
+        for (int i=0; i<3; ++i) {
+			skills.add(9); //three 9s
+			skills.add(8); //three 8s
+			skills.add(1); //three 1s
+		}
+		for (int i=0; i<2; ++i) {
+			skills.add(7); //two 7s
+			skills.add(6); //two 6s
+			skills.add(5); //two 5s
+		}
 
-        skills.add(6);
         Collections.shuffle(skills);
 
         return skills;
@@ -46,7 +51,8 @@ public class Player implements matchup.sim.Player {
 
         Collections.shuffle(index);
         int n = 0;
-        for (int i = 0; i < 3; ++i) {
+        
+    	for (int i = 0; i < 3; ++i) {
             List<Integer> row = new ArrayList<Integer>();
             for (int j = 0; j < 5; ++j) {
                 row.add(skills.get(index.get(n)));
@@ -55,7 +61,7 @@ public class Player implements matchup.sim.Player {
 
             distribution.add(row);
         }
-
+        
         return distribution;
     }
 
