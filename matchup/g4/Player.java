@@ -37,7 +37,7 @@ public class Player implements matchup.sim.Player {
 	    Integer rows[][];
 
         if (isHome) {
-		    rows = new Integer[][] {{9,9,8,8,8},{9,9,8,1,1},{9,8,1,1,1}};
+		    rows = new Integer[][] {{9,9,8,8,1},{9,9,8,1,1},{9,8,8,1,1}};
 	    } else {
 		    rows = new Integer[][] {{9,9,9,9,9},{8,8,8,8,8},{1,1,1,1,1}};
 	    }
@@ -67,7 +67,6 @@ public class Player implements matchup.sim.Player {
             	toUse = distribution.get(availableRows.get(idx));
             	availableRows.remove(idx);
             }
-
     		
     		else if (availableRows.size() == 2) {
                 int idx = lineToUse2(new Line(opponentRound), new Line(opponentSkillsLeft));
@@ -116,16 +115,19 @@ public class Player implements matchup.sim.Player {
     }
 
     private int lineToUse2(Line opponent1, Line opponent2) {
-    	Line temp1 = new Line(distribution.get(availableRows.get(0)));
-    	Line temp2 = new Line(distribution.get(availableRows.get(1)));
+    	Line temp1 = (Line)distribution.get(availableRows.get(0));
+    	Line temp2 = (Line)distribution.get(availableRows.get(1));
 
-    	temp1.permuteFor(opponent1);
+        temp1.permuteFor(opponent1);
+    	Line temp3 = new Line(temp1);
     	temp2.permuteFor(opponent2);
     	int score1 = temp1.scoreAgainst(opponent1) + temp2.scoreAgainst(opponent2);
 
     	temp1.permuteFor(opponent2);
     	temp2.permuteFor(opponent1);
     	int score2 = temp1.scoreAgainst(opponent2) + temp2.scoreAgainst(opponent1);
+
+    	temp1 = temp3;
 
         return (score2 > score1) ? 1 : 0;
     }
