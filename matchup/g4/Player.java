@@ -38,14 +38,42 @@ public class Player implements matchup.sim.Player {
 		return skills;
     }
 
-    // private List<Integer> counter(List<Integer> opponentSkills) {
-    //     Collections.sort(opponentSkills);
-    //     for(int i=0; i<opponentSkills.size();i++ ){
-    //         if(i>=6) opponentSkills.set(i, Integer.valueof(opponentSkills.get(i)-2));
-    //         else if(i<6) opponentSkills.set(i, Integer.valueof(opponentSkills.get(i)+3));
-    //         return opponentSkills;
-    //      }
-    // }
+    private List<Integer> counter(List<Integer> opponentSkills) {
+        Collections.sort(opponentSkills);
+        for(int i=0; i<opponentSkills.size();i++ ){
+            if(i>=6) opponentSkills.set(i, opponentSkills.get(i)-2);
+            else if(i<6) opponentSkills.set(i, opponentSkills.get(i)+3);
+        }
+        Collections.sort(opponentSkills);
+        int sum = opponentSkills.stream().mapToInt(Integer::intValue).sum();
+        if(sum>90){
+            int difference = sum-90;
+            int i = opponentSkills.size() - 1;
+            while(!difference){
+                i--;
+                if(i<0) i = opponentSkills.size()-1;
+                if(opponentSkills[i]>=9 && opponentSkills[i]>2) continue;
+                else{
+                	opponentSkills[i]-=1;
+                    difference-=1;
+                }
+            }
+        }
+        else if (sum<90){
+            int difference = 90-sum;
+            int i=0;
+            while(!difference){
+                i++;
+                if(i==opponentSkills.size()) i = 0;
+                if(opponentSkills[i]<3 && opponentSkills[i]<11) continue;
+                else{
+                	opponentSkills[i]+=1;
+                    difference-=1;
+                }
+            }
+        }
+        return opponentSkills;
+    }
 
     public List<List<Integer>> getDistribution(List<Integer> opponentSkills, boolean isHome) {
     	int GROUP_SIZE = 5;
