@@ -1,5 +1,5 @@
 package matchup.g7.PSO;
 
-interface FitnessEvaluation {
-	double evaluate(Particle p);
+public interface FitnessEvaluation {
+	double evaluate(double[] x);
 }

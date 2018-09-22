@@ -24,24 +24,34 @@ public class Swarm {
 	double globalBest = -Double.MAX_VALUE;
 	
 	// The coordinate when the global best was reached
-	double globalx[] = new double[11];
+	double globalx[];
 	
 	// Random generator
 	Random rd = new Random();
 	
-	public Swarm(int n, int d, double wg, double wl, double time) {
+	public Swarm(int n, int d, double wg, double wl, double time, FitnessEvaluation ev) {
 		this.n = n;
 		this.d = d;
 		this.wg = wg;
 		this.wl = wl;
 		this.time = time;
+		this.ev = ev;
 		initParticles();
+	}
+	
+	private double[] initDistribution() {
+		// TODO
+		return new double[d];
+	}
+	
+	private void updateEv(FitnessEvaluation ev) {
+		this.ev = ev;
 	}
 	
 	private void initParticles() {
 		particles = new Particle[n];
 		for (int i = 0; i < n; i++) {
-			particles[i] = new Particle(new double[d], ev); //TODO
+			particles[i] = new Particle(initDistribution(), ev);
 			particles[i].updateVelocity(randomVectorWithinRange());
 			updateGlobalBest(particles[i]);
 		}
@@ -78,6 +88,28 @@ public class Swarm {
 		}
 	}
 
+	public int[] normalizeGlobal() {
+		int x_int[] = new int[d];
+		double x_frac[] = new double[d];
+		int sum = 0;
+		for (int i = 0; i < d; i++) {
+			x_int[i] = (int)Math.round(globalx[i]);
+			sum += x_int[i];
+			x_frac[i] = globalx[i] - x_int[i];
+		}
+		if (sum < 90) 
+			for (int i = 90 - sum; i > 0; i--) {
+				x_int[maxIndex(x_frac)] += 1;
+				x_frac[maxIndex(x_frac)] -= 1.0D;
+			}
+		else 
+			for (int i = sum - 90; i > 0; i--) {
+				x_int[minIndex(x_frac)] -= 1;
+				x_frac[minIndex(x_frac)] += 1.0D;
+			}
+		return x_int;
+	}
+	
 	/**
 	 * Generate a random vector in dimension d with its L1 distance as 0.
 	 * @return a length-d array of random numbers
@@ -92,9 +124,41 @@ public class Swarm {
 		
 		for (int i = 0; i < d; i++) {
 			v[i] /= sum;
-			v[i] -= 1.0D;
+			v[i] -= 1.0D / d;
 		}
 		
 		return v;
+	}
+	
+	private int minIndex(double[] array){
+		double min = Double.MAX_VALUE;
+		int minIndex = -1;
+		for (int i = 0; i < array.length; i++)
+			if (array[i] < min) {
+				min = array[i];
+				minIndex = i;
+			}
+		return minIndex;
+	}
+	
+	private int maxIndex(double[] array){
+		double max = -Double.MAX_VALUE;
+		int maxIndex = -1;
+		for (int i = 0; i < array.length; i++)
+			if (array[i] > max) {
+				max = array[i];
+				maxIndex = i;
+			}
+		return maxIndex;
+	}
+	
+	public static void main(String[] args) {
+		Swarm swarm = new Swarm(20, 15, 0.7, 0.3, 0.5, x -> (x[11] - x[0]));
+		double sum = 0;
+		for (double entry : swarm.randomVectorWithinRange()) {
+			sum += entry;
+		}
+		//for (int entry : swarm.normalizeGlobal())
+		System.out.println(sum);
 	}
 }
