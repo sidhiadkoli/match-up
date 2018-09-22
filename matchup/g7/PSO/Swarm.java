@@ -38,10 +38,15 @@ public class Swarm {
 		initParticles();
 	}
 	
+	private double[] initDistribution() {
+		// TODO
+		return new double[d];
+	}
+	
 	private void initParticles() {
 		particles = new Particle[n];
 		for (int i = 0; i < n; i++) {
-			particles[i] = new Particle(new double[d], ev); //TODO
+			particles[i] = new Particle(initDistribution(), ev);
 			particles[i].updateVelocity(randomVectorWithinRange());
 			updateGlobalBest(particles[i]);
 		}
@@ -78,6 +83,28 @@ public class Swarm {
 		}
 	}
 
+	public int[] normalizeGlobal() {
+		int x_int[] = new int[d];
+		double x_frac[] = new double[d];
+		int sum = 0;
+		for (int i = 0; i < d; i++) {
+			x_int[i] = (int)Math.round(globalx[i]);
+			sum += x_int[i];
+			x_frac[i] = globalx[i] - x_int[i];
+		}
+		if (sum < 90) 
+			for (int i = 90 - sum; i > 0; i--) {
+				x_int[maxIndex(x_frac)] += 1;
+				x_frac[maxIndex(x_frac)] -= 1.0D;
+			}
+		else 
+			for (int i = sum - 90; i > 0; i--) {
+				x_int[minIndex(x_frac)] -= 1;
+				x_frac[minIndex(x_frac)] += 1.0D;
+			}
+		return x_int;
+	}
+	
 	/**
 	 * Generate a random vector in dimension d with its L1 distance as 0.
 	 * @return a length-d array of random numbers
@@ -97,4 +124,27 @@ public class Swarm {
 		
 		return v;
 	}
+	
+	private int minIndex(double[] array){
+		double min = Double.MAX_VALUE;
+		int minIndex = -1;
+		for (int i = 0; i < array.length; i++)
+			if (array[i] < min) {
+				min = array[i];
+				minIndex = i;
+			}
+		return minIndex;
+	}
+	
+	private int maxIndex(double[] array){
+		double max = -Double.MAX_VALUE;
+		int maxIndex = -1;
+		for (int i = 0; i < array.length; i++)
+			if (array[i] < max) {
+				max = array[i];
+				maxIndex = i;
+			}
+		return maxIndex;
+	}
+	
 }
