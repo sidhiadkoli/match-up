@@ -46,8 +46,10 @@ public class Player implements matchup.sim.Player {
 							return -Double.MAX_VALUE;
 						else if (x[i] >= j + 3)
 							score += dic[i][j];
-						else if (x[i] < j - 2)
+						else if ((x[i] < j - 2) && (x[i] > 0))
 							score -= dic[i][j];
+						else
+							return -Double.MAX_VALUE;
 					}
 				}
 				return score;
