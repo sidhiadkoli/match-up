@@ -28,6 +28,13 @@ class Particle {
 		this(Arrays.stream(x).asDoubleStream().toArray(), ev);
 	}
 	
+	void updateEv(FitnessEvaluation ev) {
+		this.ev = ev;
+		localy = -Double.MAX_VALUE;
+		evaluate();
+		updateLocalBest();
+	}
+	
 	double getFitness() {
 		return y;
 	}
@@ -47,6 +54,13 @@ class Particle {
 	}
 	
 	void evaluate() {
+		/*
+		double sum = 0.0D;
+		for (double i : x) {
+			sum += i;
+		}
+		System.out.println(sum);
+		*/
 		y = ev.evaluate(x);
 	}
 	
@@ -55,6 +69,7 @@ class Particle {
 		if (flag) {
 			localx = x.clone();
 			localy = y;
+			//System.out.println(y);
 		}
 		return flag;
 	}

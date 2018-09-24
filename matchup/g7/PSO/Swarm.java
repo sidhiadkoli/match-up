@@ -21,7 +21,7 @@ public class Swarm {
 	FitnessEvaluation ev;
 	
 	// The current global best value of all particles
-	double globalBest = -Double.MAX_VALUE;
+	public double globalBest = -Double.MAX_VALUE;
 	
 	// The coordinate when the global best was reached
 	double globalx[];
@@ -39,12 +39,39 @@ public class Swarm {
 		initParticles();
 	}
 	
-	private int[] initDistribution() {
-		return RandomDistGenerator.randomDist().stream().mapToInt(Integer::intValue).toArray();
+	private double[] initDistribution() {
+		//return RandomDistGenerator.randomDist().stream().mapToInt(Integer::intValue).toArray();
+		Random rand = new Random();
+		double sum = 0.0D;
+		double[] dist = new double[d];
+		for (int i = 0; i < d; i++) {
+			dist[i] = rand.nextDouble();
+			sum += dist[i];
+		}
+		for (int i = 0; i < d; i++) {
+			dist[i] *= 75.0D / sum;
+			dist[i] += 1.0D;
+			if (dist[i] < 1.0D || dist[i] > 11.0D)
+				return initDistribution();
+		}
+		
+		/*sum = 0;
+		for (int i = 0; i < d; i++) {
+			sum += dist[i];
+		}
+		if (Math.abs(sum - 90) > 0.1D)
+			System.out.println("This is wrong!!!!");
+		*/
+		return dist;
 	}
 	
 	public void updateEv(FitnessEvaluation ev) {
 		this.ev = ev;
+		globalBest = -Double.MAX_VALUE;
+		for (Particle p : particles) {
+			p.updateEv(ev);
+			updateGlobalBest(p);
+		}
 	}
 	
 	private void initParticles() {
@@ -60,6 +87,10 @@ public class Swarm {
 		boolean flag = p.getFitness() > globalBest;
 		if (flag){
 			globalx = p.getLocalX();
+			/*double sum = 0.0D;
+			for (double x : globalx)
+				sum += x;
+			System.out.println(sum);*/
 			globalBest = p.getFitness();
 		}
 		return flag;
@@ -95,17 +126,29 @@ public class Swarm {
 			x_int[i] = (int)Math.round(globalx[i]);
 			sum += x_int[i];
 			x_frac[i] = globalx[i] - x_int[i];
+			// System.out.println(globalx[i]);
 		}
 		if (sum < 90) 
 			for (int i = 90 - sum; i > 0; i--) {
-				x_int[maxIndex(x_frac)] += 1;
-				x_frac[maxIndex(x_frac)] -= 1.0D;
+				int maxIndex = maxIndex(x_frac);
+				x_int[maxIndex] += 1;
+				x_frac[maxIndex] -= 1.0D;
 			}
 		else 
 			for (int i = sum - 90; i > 0; i--) {
-				x_int[minIndex(x_frac)] -= 1;
-				x_frac[minIndex(x_frac)] += 1.0D;
+				int minIndex = minIndex(x_frac);
+				x_frac[minIndex] += 1.0D;
+				if (x_int[minIndex] == 1) {
+					i++;
+				}
+				else
+					x_int[minIndex] -= 1;
 			}
+		
+		for (int i = 0; i < d; i++) {
+			if (x_int[i] == 0)
+				System.out.println(globalx[i]);
+		}
 		return x_int;
 	}
 	
@@ -122,8 +165,8 @@ public class Swarm {
 		}
 		
 		for (int i = 0; i < d; i++) {
-			v[i] /= sum;
-			v[i] -= 1.0D / d;
+			v[i] /= sum * 5.0D;
+			v[i] -= 5.0D / d;
 		}
 		
 		return v;

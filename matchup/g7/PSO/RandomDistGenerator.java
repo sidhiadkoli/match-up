@@ -14,14 +14,14 @@ public class RandomDistGenerator {
     private static Random rand;
 
     // TESTING
-    //public static void main(String[] args) {
-    public static ArrayList<Integer> randomDist() {
+    public static void main(String[] args) {
+    //public static ArrayList<Integer> randomDist() {
     	
         Integer max;
         Integer player;
         Integer skill;
 
-        rand = new Random(seed);
+        rand = new Random();
 
         players_skills = new HashMap<Integer, Integer>();
         for (int i = 0; i < 15; i++) {
@@ -35,8 +35,10 @@ public class RandomDistGenerator {
             player = rand.nextInt(15);
 
             for (int p : elevens) {
-                if (player >= p) {
+                if (player == p) {
                     player++;
+                    if (player > 14)
+                    	player = 0;
                 }
             }
 
@@ -56,17 +58,17 @@ public class RandomDistGenerator {
             skills.add(i);
         }
         
-        /*
+        
         int n = 0;
         for (int i : skills) {
             System.out.printf("%d\n", i);
             n += i;
         }
         System.out.printf("%d\n", n);
-        */
+        
         
 
-        return skills;
+        //return skills;
     }
 
 }

@@ -33,7 +33,7 @@ public class Player implements matchup.sim.Player {
 	
 	public Player() {
 		// TODO Find out a good skill set
-		skills = new ArrayList<Integer>(Arrays.asList(1, 1, 1, 1, 1, 4, 9, 9, 9, 9, 9, 9, 9, 9, 9));
+		skills = new ArrayList<Integer>(Arrays.asList(1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9));
 		availableRows = new ArrayList<Integer>(Arrays.asList(0, 1, 2));
 		averageStrength = new ArrayList<Float>();
 		opponentDistribution = new ArrayList<List<Integer>>();
@@ -49,7 +49,7 @@ public class Player implements matchup.sim.Player {
 				for (int i = 0; i < x.length; i++) {
 					for (int j = 0; j < dic[i].length; j++) {
 						// Step-based evaluation, +1 for win and -1 for lose
-						if ((x[i] > 11.0D) || (x[i] < 0.0D))
+						if ((x[i] > 11.0D) || (x[i] < 1.0D))
 							return -Double.MAX_VALUE / 2;
 						else if (x[i] >= j + 3)
 							score += dic[i][j];
@@ -60,9 +60,7 @@ public class Player implements matchup.sim.Player {
 				return score;
 			}
 		};
-		swarm = new Swarm(20, 15, 0.7D, 0.3D, 0.2D, ev);
-		print("bp1");
-		logHistory();
+		swarm = new Swarm(50, 15, 0.7D, 0.3D, 0.10D, ev);
 	}
 	
 	@Override
@@ -73,6 +71,7 @@ public class Player implements matchup.sim.Player {
 
 	@Override
 	public List<Integer> getSkills() {
+		logHistory();
 		return skills;
 	}
 
@@ -120,7 +119,8 @@ public class Player implements matchup.sim.Player {
 	 * @return a pair containing score difference and the optimal permutation
 	 */
 	private void logHistory() {
-		if (opponentDistribution != null) {
+		if (opponentDistribution.size() != 0) {
+			//print("bp4");
 			Collections.sort(opponentDistribution, (l1, l2) -> {
 				if (findAverage(l1) > findAverage(l2))
 					return 1;
@@ -138,17 +138,35 @@ public class Player implements matchup.sim.Player {
 				List<Integer> line = opponentDistribution.get(i);
 				Collections.sort(line);
 				for (int j = 0; j < line.size(); j++) {
-					dic[5 * i + j][line.get(j)] += (rounds + 1);
+					dic[5 * i + j][line.get(j)] += (2 / rounds);
 					for (int k = 0; k < dic[5 * i + j].length; k++) {
 						dic[5 * i + j][k] /= ((rounds + 2) / rounds);
 					}
 				}
 			}
 			rounds++;
+			opponentDistribution.clear();
 		}
-		print("bp2");
-		swarm.update(50);
-		print("bp3");
+		swarm.updateEv(new FitnessEvaluation() {
+			@Override
+			public double evaluate(double[] x) {
+				double score = 0.0D;
+				for (int i = 0; i < x.length; i++) {
+					for (int j = 0; j < dic[i].length; j++) {
+						// Step-based evaluation, +1 for win and -1 for lose
+						if ((x[i] > 11.0D) || (x[i] < 1.0D))
+							return -Double.MAX_VALUE / 2;
+						else if (x[i] >= j + 3)
+							score += dic[i][j];
+						else if (x[i] < j - 2)
+							score -= dic[i][j];
+					}
+				}
+				return score;
+			}
+		});
+		swarm.update(200);
+		System.out.println(swarm.globalBest);
 		skills = Arrays.stream(swarm.normalizeGlobal()).boxed().collect(Collectors.toList());
 	}
 	
@@ -277,9 +295,9 @@ public class Player implements matchup.sim.Player {
 	public List<Integer> playRound(List<Integer> opponentRound) {
 		
 		List<Integer> round = new ArrayList<Integer>();
-		opponentDistribution.add(opponentRound);
 		
     	if (state){
+    		opponentDistribution.add(new ArrayList<Integer>(opponentRound));
     		for (Integer i : opponentRound) {
     			opponentRemainSkills.remove(i);
     		}
