@@ -1,9 +1,13 @@
 package matchup.sim;
 
 import java.awt.Desktop;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -67,18 +71,14 @@ public class Simulator {
         isHome = true;
 
         for (int j=0; j < n_games; ++j) {
-
-            List<List<Integer>> skills = new ArrayList<List<Integer>>();
-            List<List<List<Integer>>> distribution = new ArrayList<List<List<Integer>>>();
-
             System.out.println("\nStarting game with players " + playerA.getName() + ", " + playerB.getName());
 
             try {
                 playerA.init(playerBName);
                 playerB.init(playerAName);
 
-                List<Integer> skillsA = playerA.getSkills();
-                List<Integer> skillsB = playerB.getSkills();
+                List<Integer> skillsA = new ArrayList<Integer>(playerA.getSkills());
+                List<Integer> skillsB = new ArrayList<Integer>(playerB.getSkills());
 
                 for (int i = 0; i < 2; ++i)
                 {
@@ -92,8 +92,8 @@ public class Simulator {
                     game.playerA.skills = skillsA;
                     game.playerB.skills = skillsB;
 
-                    game.playerA.distribution = playerA.getDistribution(skillsB, isHome);
-                    game.playerB.distribution = playerB.getDistribution(skillsA, !isHome);
+                    game.playerA.distribution = getClone(playerA.getDistribution(skillsB, isHome));
+                    game.playerB.distribution = getClone(playerB.getDistribution(skillsA, !isHome));
 
                     List<Integer> roundA = null;
                     List<Integer> roundB = null;
@@ -110,8 +110,8 @@ public class Simulator {
                             roundB = playerB.playRound(roundA);
                         }
 
-                        game.playerA.rounds.add(roundA);
-                        game.playerB.rounds.add(roundB);
+                        game.playerA.rounds.add(new ArrayList<Integer>(roundA));
+                        game.playerB.rounds.add(new ArrayList<Integer>(roundB));
 
                         int[] scores = getScores(roundA, roundB);
                         game.playerA.score += scores[0];
@@ -151,11 +151,111 @@ public class Simulator {
             }
         }
 
+        printStats();
+
         System.exit(0);
     }
 
+    public static void printStats() {
+        int playerAAwayScores = 0;
+        int playerAHomeScores = 0;
+        int playerBAwayScores = 0;
+        int playerBHomeScores = 0;
+
+        int playerAWins = 0;
+        int playerBWins = 0;
+        int ties = 0;
+
+        int totalA = 0;
+        int totalB = 0;
+
+        int counter = 1;
+
+        for (Game g : games) {
+            if (g.playerA.isHome) {
+                playerAHomeScores += g.playerA.score;
+                playerBAwayScores += g.playerB.score;
+
+                totalA += g.playerA.score;
+                totalB += g.playerB.score;
+            }
+            else {
+                playerAAwayScores += g.playerA.score;
+                playerBHomeScores += g.playerB.score;
+
+                totalA += g.playerA.score;
+                totalB += g.playerB.score;
+            }
+
+            if (counter % 2 == 0) {
+                if (totalA > totalB) {
+                    playerAWins += 1;
+                }
+                else if (totalA == totalB){
+                    ties += 1;
+                }
+                else {
+                    playerBWins += 1;
+                }
+
+                totalA = 0;
+                totalB = 0;
+            }
+
+            counter += 1;
+        }
+
+        System.out.println("\n******** Results ********");
+        System.out.println("\nTotal wins: ");
+        System.out.println(playerAName + ": " + playerAWins);
+        System.out.println(playerBName + ": " + playerBWins);
+        System.out.println("\nTies: " + ties);
+        System.out.println("\nTotal scores: ");
+        System.out.println(playerAName + ": " + (playerAHomeScores + playerAAwayScores));
+        System.out.println(playerBName + ": " + (playerBHomeScores + playerBAwayScores));
+        System.out.println("\nAvg scores as Home: ");
+        System.out.println(playerAName + ": " + ((double)playerAHomeScores*2/games.size()));
+        System.out.println(playerBName + ": " + ((double)playerBHomeScores*2/games.size()));
+        System.out.println("\nAvg scores as Away: ");
+        System.out.println(playerAName + ": " + ((double)playerAAwayScores*2/games.size()));
+        System.out.println(playerBName + ": " + ((double)playerBAwayScores*2/games.size()));
+    }
+
+    private static List<List<Integer>> getClone(List<List<Integer>> lol) {
+        List<List<Integer>> newLol = new ArrayList<>();
+        for (List<Integer> l : lol) {
+            newLol.add(new ArrayList<Integer>(l));
+        }
+
+        return newLol;
+    }
+
     public static List<Game> getGames() {
-        return games;
+        List<Game> cloneGames = new ArrayList<Game>();
+        for (Game g : games) {
+            cloneGames.add(deepClone(g));
+        }
+
+        return cloneGames;
+    }
+
+    public static Game getLastGame() {
+        return deepClone(games.get(games.size() - 1));
+    }
+
+    private static Game deepClone(Object object) {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+            objectOutputStream.writeObject(object);
+            ByteArrayInputStream bais = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            ObjectInputStream objectInputStream = new ObjectInputStream(bais);
+            return (Game) objectInputStream.readObject();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private static int[] getScores(List<Integer> roundA, List<Integer> roundB) {
