@@ -1,40 +1,72 @@
-package matchup.g7.PSO;
+//package matchup.g7.PSO;
 
-import javafx.util.Pair;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.Collections;
 
 public class RandomDistGenerator {
-	// Inspired by Mike Housky on StackOverflow:
-	// https://stackoverflow.com/questions/18448417/create-constrained-random-numbers/18448874#18448874
-	
-	public RandomDistGenerator(Pair<Integer, Integer>[] range, int target) {
-		// TODO
-	}
-	
-	/**
-	 * return a convolutional vector of size width
-	 * @param vector the original vector
-	 * @param width the width of convolution
-	 * @return the convolutional vector
-	 */
-	private static int[] stepConvolution(int[] vector, int width) {
-		int result[] = new int[vector.length + width];
-		for (int i = 0; i < vector.length; i++) {
-			result[i + width] = vector[i];
-		}
-		
-		int sum = 0;
-		for (int i = 0; i <= width; i++)
-			sum += result[i];
-		
-		result[0] = sum;
-		for (int i = 1; i < result.length; i++) {
-			sum -= result[i - 1];
-			if (i < vector.length)
-				sum += result[i + width];
-			result[i] = sum;
-		}
-		return result;
-	}
-	
-	
+    private ArrayList<Integer> skills;
+    private ArrayList<Integer> elevens;
+    private HashMap<Integer, Integer> players_skills;
+
+    private int seed = 0;
+    private Random rand;
+
+    // TESTING
+    //public static void main(String[] args) {
+    public ArrayList<Integer> randomDist() {
+        Integer max;
+        Integer player;
+        Integer skill;
+
+        rand = new Random(seed);
+
+        players_skills = new HashMap<Integer, Integer>();
+        for (int i = 0; i < 15; i++) {
+            players_skills.put(i,1);
+        }
+
+        skills = new ArrayList<Integer>();
+        elevens = new ArrayList<Integer>();
+        for (int i = 0; i < 74; i++) {
+            max = 15 - skills.size();
+            player = rand.nextInt(15);
+
+            for (int p : elevens) {
+                if (player >= p) {
+                    player++;
+                }
+            }
+
+            skill = players_skills.get(player);
+            players_skills.put(player, ++skill);
+
+            if (skill == 10) {
+                players_skills.remove(player);
+                skills.add(11);
+                elevens.add(player);
+                Collections.sort(elevens);
+            }
+
+        }
+
+        for (int i : players_skills.values()) {
+            skills.add(i);
+        }
+
+        /* TESTING
+        int n = 0;
+        for (int i : skills) {
+            System.out.printf("%d\n", i);
+            n += i;
+        }
+        System.out.printf("%d\n", n);
+        */
+
+        return skills;
+    }
+
 }
+
+
