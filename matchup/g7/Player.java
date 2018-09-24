@@ -5,10 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.HashMap;
 
 import javafx.util.Pair;
 import matchup.g7.PSO.FitnessEvaluation;
+import matchup.g7.PSO.Swarm;
 
 
 public class Player implements matchup.sim.Player {
@@ -25,6 +27,7 @@ public class Player implements matchup.sim.Player {
 	private int rounds = 1;
 	
 	private FitnessEvaluation ev;
+	private Swarm swarm;
 	
 	private boolean state; // Whether the player is playing as the home team
 	
@@ -33,8 +36,12 @@ public class Player implements matchup.sim.Player {
 		skills = new ArrayList<Integer>(Arrays.asList(1, 1, 1, 1, 1, 4, 9, 9, 9, 9, 9, 9, 9, 9, 9));
 		availableRows = new ArrayList<Integer>(Arrays.asList(0, 1, 2));
 		averageStrength = new ArrayList<Float>();
-		
-		logHistory();
+		opponentDistribution = new ArrayList<List<Integer>>();
+		state = false;
+
+		for (int i = 0; i < 15; i++)
+			for (int j = 0; j < 11; j++)
+				dic[i][j] = 1.0D / 11.0D;
 		ev = new FitnessEvaluation() {
 			@Override
 			public double evaluate(double[] x) {
@@ -42,27 +49,20 @@ public class Player implements matchup.sim.Player {
 				for (int i = 0; i < x.length; i++) {
 					for (int j = 0; j < dic[i].length; j++) {
 						// Step-based evaluation, +1 for win and -1 for lose
-						if (x[i] > 11.0D)
-							return -Double.MAX_VALUE;
+						if ((x[i] > 11.0D) || (x[i] < 0.0D))
+							return -Double.MAX_VALUE / 2;
 						else if (x[i] >= j + 3)
 							score += dic[i][j];
-						else if ((x[i] < j - 2) && (x[i] > 0))
+						else if (x[i] < j - 2)
 							score -= dic[i][j];
-						else
-							return -Double.MAX_VALUE;
 					}
 				}
 				return score;
 			}
 		};
-			
-		
-		state = false;
-
-		for (int i = 0; i < 15; i++)
-			for (int j = 0; j < 11; j++)
-				dic[i][j] = 1.0D / 11.0D;
-
+		swarm = new Swarm(20, 15, 0.7D, 0.3D, 0.2D, ev);
+		print("bp1");
+		logHistory();
 	}
 	
 	@Override
@@ -86,9 +86,9 @@ public class Player implements matchup.sim.Player {
 		if (isHome) {
 			List<Integer> temp = new ArrayList<Integer>();
 
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(1), skills.get(4), skills.get(7), skills.get(10), skills.get(13))));
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(2), skills.get(5), skills.get(8), skills.get(11), skills.get(14))));
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(3), skills.get(6), skills.get(9), skills.get(12), skills.get(0))));
+			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(0), skills.get(1), skills.get(2), skills.get(3), skills.get(4))));
+			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(5), skills.get(6), skills.get(7), skills.get(8), skills.get(9))));
+			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(10), skills.get(11), skills.get(12), skills.get(13), skills.get(14))));
 		}
 		else {
 			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(1), skills.get(2), skills.get(3), skills.get(4), skills.get(5))));
@@ -146,6 +146,10 @@ public class Player implements matchup.sim.Player {
 			}
 			rounds++;
 		}
+		print("bp2");
+		swarm.update(50);
+		print("bp3");
+		skills = Arrays.stream(swarm.normalizeGlobal()).boxed().collect(Collectors.toList());
 	}
 	
 

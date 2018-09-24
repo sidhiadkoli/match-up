@@ -2,11 +2,11 @@ package matchup.g7.PSO;
 
 import javafx.util.Pair;
 
-public class RandomDistGenerator {
+public class RandomDistGenerator_old {
 	// Inspired by Mike Housky on StackOverflow:
 	// https://stackoverflow.com/questions/18448417/create-constrained-random-numbers/18448874#18448874
 	
-	public RandomDistGenerator(Pair<Integer, Integer>[] range, int target) {
+	public RandomDistGenerator_old(Pair<Integer, Integer>[] range, int target) {
 		// TODO
 	}
 	

@@ -13,7 +13,7 @@ class Particle {
 	
 	// local best
 	private double localy = -Double.MAX_VALUE;
-	private double localx[];
+	double localx[];
 	
 	Particle(double[] x, FitnessEvaluation ev) {
 		this.x = x;

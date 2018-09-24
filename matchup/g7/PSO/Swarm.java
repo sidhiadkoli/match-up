@@ -39,12 +39,11 @@ public class Swarm {
 		initParticles();
 	}
 	
-	private double[] initDistribution() {
-		// TODO
-		return new double[d];
+	private int[] initDistribution() {
+		return RandomDistGenerator.randomDist().stream().mapToInt(Integer::intValue).toArray();
 	}
 	
-	private void updateEv(FitnessEvaluation ev) {
+	public void updateEv(FitnessEvaluation ev) {
 		this.ev = ev;
 	}
 	
@@ -151,7 +150,7 @@ public class Swarm {
 			}
 		return maxIndex;
 	}
-	
+	/*
 	public static void main(String[] args) {
 		Swarm swarm = new Swarm(20, 15, 0.7, 0.3, 0.5, x -> (x[11] - x[0]));
 		double sum = 0;
@@ -161,4 +160,5 @@ public class Swarm {
 		//for (int entry : swarm.normalizeGlobal())
 		System.out.println(sum);
 	}
+	*/
 }

@@ -1,4 +1,4 @@
-//package matchup.g7.PSO;
+package matchup.g7.PSO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,16 +6,17 @@ import java.util.Random;
 import java.util.Collections;
 
 public class RandomDistGenerator {
-    private ArrayList<Integer> skills;
-    private ArrayList<Integer> elevens;
-    private HashMap<Integer, Integer> players_skills;
+    private static ArrayList<Integer> skills;
+    private static ArrayList<Integer> elevens;
+    private static HashMap<Integer, Integer> players_skills;
 
-    private int seed = 0;
-    private Random rand;
+    private static int seed = 0;
+    private static Random rand;
 
     // TESTING
     //public static void main(String[] args) {
-    public ArrayList<Integer> randomDist() {
+    public static ArrayList<Integer> randomDist() {
+    	
         Integer max;
         Integer player;
         Integer skill;
@@ -54,8 +55,8 @@ public class RandomDistGenerator {
         for (int i : players_skills.values()) {
             skills.add(i);
         }
-
-        /* TESTING
+        
+        /*
         int n = 0;
         for (int i : skills) {
             System.out.printf("%d\n", i);
@@ -63,6 +64,7 @@ public class RandomDistGenerator {
         }
         System.out.printf("%d\n", n);
         */
+        
 
         return skills;
     }
