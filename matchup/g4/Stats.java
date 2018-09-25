@@ -138,10 +138,10 @@ class Stats {
             predOppSkills.add(maxmode(temp));
         }
 
-        for (int i = 0; i < 3; i++) {
-            List<Integer> cur = opskills.get(i);
-        	System.out.println(cur + " : " + predOppSkills.distanceFrom(cur));
-        }
+        //for (int i = 0; i < 3; i++) {
+        //    List<Integer> cur = opskills.get(i);
+        //	System.out.println(cur + " : " + predOppSkills.distanceFrom(cur));
+        //}
         System.out.println("predicted:");
         System.out.println(predOppSkills);
 
@@ -212,5 +212,16 @@ class Stats {
             }
         }
         return opponentSkills;
+    }
+
+    private boolean isConverging(List<List<Integer>> opskills, Skills predOppSkills) {
+        int total = 0;
+
+        for (int i = 0; i < 3; i++) {
+            List<Integer> cur = opskills.get(i);
+            total += predOppSkills.distanceFrom(opskills.get(i));
+        }
+
+        return total < 15;
     }
 }
