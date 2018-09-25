@@ -1,4 +1,4 @@
-package matchup.g2;
+package matchup.g10;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,8 +9,203 @@ import java.lang.Math;
 import java.util.Map;
 import java.util.HashMap;
 
+
+
 public class Player implements matchup.sim.Player {
-	private List<Integer> skills;
+
+        public class Skill {
+	    private Integer value;
+	    private List<Integer> preferenceList;
+	    private List<Skill> manMarking;
+	    private Skill partner;
+	    private List<Skill> offers;
+	    private Integer proposals;
+    
+	    public Skill(int v, List<Integer> l){
+	        value = v;
+	        preferenceList = l;
+		offers = new ArrayList<Skill>();
+		proposals = 0;
+	    }
+
+	    public List<Integer> preferenceList(){
+		return preferenceList;
+	    }
+
+	    public void buildMM(List<Skill> oppSkills){
+		//build preference list against a specific team instead of the generic one
+		manMarking = new ArrayList<Skill>();
+		for (Integer p : preferenceList){
+		    for (Skill opp : oppSkills){
+			if (opp.getValue() == p){
+			    manMarking.add(opp);
+			}
+		    }
+		}
+		proposals = 0;
+	    }
+	    
+	    
+	    public void propose(){
+		//proposes to next availible skill on updated preference list
+		manMarking.get(proposals).addProp(this);
+		proposals ++;
+	    }
+
+	    public void addProp(Skill opp){
+		offers.add(opp);
+	    }
+
+	    public void update(){
+		//checks proposals and takes best one
+		for(Integer p: preferenceList){
+		    if(partner != null && partner.getValue() == p){
+			return;
+		    }
+		    for(Skill opp: offers){
+			if(opp.getValue() == p){
+			    if(partner != null){
+				partner.rejection();
+			    }
+			    partner = opp;
+			    opp.setPartner(this);
+			    offers.clear();
+			    return;
+			}
+		    }
+		}
+	    }
+
+	    public void clear(){
+		partner = null;
+		offers = new ArrayList<Skill>();
+		proposals = 0;
+	    }
+
+	    public void rejection(){
+		//resets partner to -1 if left in update
+		partner = null;
+	    }
+
+	    public void setPartner(Skill opp){
+		partner = opp;
+	    }
+	    
+	    public Skill getPartner(){
+		return partner;
+	    }
+
+	    public Integer getValue(){
+		return value;
+	    }
+	}
+
+    public class Line {
+
+	private List<Skill> members;
+	private List<Integer> values;
+	
+	public Line(List<Integer> players, boolean ourTeam){
+	    values = new ArrayList<Integer>();
+	    members = new ArrayList<Skill>();
+	    for(int p : players){
+		values.add(p);
+		Skill member;
+		if(ourTeam) {
+		    member = new Skill(p, prefLists.get(p-1));
+		} else {
+		    member = new Skill(p, opponentPrefLists.get(p-1));
+		}
+		members.add(member);
+	    }    
+	}
+
+	public Integer score(){
+	    //lower score means better matchups
+	    Integer score = 0;
+	    for(Skill m : members){
+		score += (m.preferenceList().indexOf(m.getPartner().getValue()));
+	    }
+	    return score;
+	}
+
+	public Integer score(List<Integer> subset){
+	    //scores part of a line
+	    Integer score = 0;
+	    for(int s : subset){
+		for(Skill m: members){
+		    if(m.getValue() == s){
+			score += (m.preferenceList().indexOf(m.getPartner().getValue()));
+		    }
+		}
+	    }
+	    return score;
+	}
+
+	public Integer size(){
+	    return members.size();
+	}
+
+	public Integer marriages(){
+	    //return number of engaged players in line
+	    int count = 0;
+	    for(Skill s: members){
+		if(s.getPartner() != null){
+		    count ++;
+		}
+	    }
+	    return count;
+	}
+
+	public void clear(){
+	    for(Skill s: members){
+		s.clear();
+	    }
+	}
+
+	public List<Skill> unmarried(){
+	    //returns unmarried skills
+	    List<Skill> bachlors = new ArrayList<Skill>();
+	    for(Skill s: members){
+		if(s.getPartner() == null){
+		    bachlors.add(s);
+		}
+	    }
+	    return bachlors;
+	}
+
+	public void adjustPL(Line opp){
+	    //make member preference lists fit the opponents team comp
+	    for(Skill m: members){
+		m.buildMM(opp.memberList());
+	    }
+	}
+
+	public List<Skill> memberList(){
+	    return members;
+	}
+
+	public List<Integer> valueList(){
+	    return values;
+	}
+
+	public void removePlayers(List<Integer> played){
+	    //take player off the line once they have been played
+	    for (int p: played){
+		for (int i=members.size()-1; i>=0; i--){
+		    if(members.get(i).getValue() == p){
+			members.remove(i);
+			values.remove(i);
+			break;
+		    }
+		}
+	    }
+	}
+    }
+
+    
+
+        private List<Integer> skills;
 	private List<List<Integer>> distribution;
 
 	private List<Integer> availableRows;
@@ -21,8 +216,15 @@ public class Player implements matchup.sim.Player {
 
 	private List<Integer> bestLine = new ArrayList<Integer>();
 	private int score; 
-	private int counter; 
+	private int counter;
+        private List<Integer> strategy = Arrays.asList(-3,2,10,9,8,7,6,-4,1,5,0,-5,-1,4,-6,-7,-8,-9,-10,-2,3);
+        private ArrayList<ArrayList<Integer>> prefLists;
+        private ArrayList<ArrayList<Integer>> opponentPrefLists;
+        private Line lineup;
+        private Line opponentLineup;
 
+    
+    
 	public Player() {
 		rand = new Random();
 		skills = new ArrayList<Integer>();
@@ -31,28 +233,72 @@ public class Player implements matchup.sim.Player {
 
 		for (int i = 0; i < 3; ++i)
 			availableRows.add(i);
+
+		prefLists = new ArrayList<ArrayList<Integer>>();
+		opponentPrefLists = new ArrayList<ArrayList<Integer>>();
+		
+	        for (int i=1; i<12; i++) {
+		        ArrayList<Integer> ourList = new ArrayList<Integer>();
+			ArrayList<Integer> theirList = new ArrayList<Integer>();
+			for (int s : strategy) {
+			    if (i+s >= 1){ if (i+s <= 11){
+				    ourList.add(i+s); }}
+			    
+			    if (i-s >= 1){ if (i-s <= 11){
+				    theirList.add(i-s); }}
+			}
+			prefLists.add(ourList);
+			opponentPrefLists.add(theirList);
+		}
+		
 	}
 
 	public void init(String opponent) {
 	}
 
 	// NINE 9s one 4 five 1s
-	public List<Integer> getSkills() {
+	public List<Integer> getSkills() {	    
+	    skills = new ArrayList<Integer>();
+	    /*	    skills.add(4); // adding one 4
+	    for (int i = 0 ; i < 9; i++){
 		
-		skills.add(4); // adding one 4
-		for (int i = 0 ; i < 9; i++){
-
-			//adding nine 9s
-			skills.add(9);
-
-			//adding five 1s
-			if(i%2 == 0){
-				skills.add(1);
-			}
+		//adding nine 9s
+		skills.add(9);
+		
+		//adding five 1s
+		if(i%2 == 0){
+		    skills.add(1);
 		}
-		return skills;
+		} */
+	    for (int i=0; i<6; i++){
+		int x = rand.nextInt(11) + 1;
+		skills.add(x);
+		skills.add(12-x);
+	    }
+	    skills.add(6);
+	    skills.add(7);
+	    skills.add(5);
+	    System.out.println("returned skills");
+	    return skills;
 	}
 
+        public List<Integer> GaleShapely(Line ourTeam, Line theirTeam){
+	    ourTeam.adjustPL(theirTeam);
+	    while (theirTeam.marriages() < theirTeam.size()){
+		for( Skill member : ourTeam.unmarried() ){
+		    member.propose();
+		}
+		for( Skill member : theirTeam.memberList() ){
+		    member.update();
+		}
+	    }
+	    ArrayList<Integer> ordering = new ArrayList<Integer>();
+	    for( Skill member : theirTeam.memberList() ){
+		ordering.add(member.getPartner().getValue());
+	    }
+	    return ordering;
+        }
+    
 	// -- Gather information about opponent's skills --
 	private Map<String, Double> getSkillStats(List<Integer> skills) {
 
@@ -146,11 +392,15 @@ public class Player implements matchup.sim.Player {
 
 	public List<List<Integer>> getDistribution(List<Integer> opponentSkills, boolean isHome) {
 		distribution = new ArrayList<List<Integer>>();
-
+		home = isHome;
+		opponentLineup = new Line(opponentSkills, false);
+		lineup = new Line(skills, true);
+		
 		skills.sort(null);
 		opponentSkills.sort(null);
-		//System.out.println("our skills: " + skills);
-		//System.out.println("opponent skills: " + opponentSkills);
+	       
+		System.out.println("our skills: " + skills);
+		System.out.println("opponent skills: " + opponentSkills);
 
 		if (isHome) {
 			// -- Arrange rows to be optimal for HOME play --
@@ -398,124 +648,133 @@ public class Player implements matchup.sim.Player {
 			distribution.add(row3);
 		}
 
-		// System.out.println("distributions: " + distribution.get(0) + ", " +
-		// distribution.get(1) + ", " + distribution.get(2));
+		System.out.println("distributions: " + distribution.get(0) + ", " +
+		distribution.get(1) + ", " + distribution.get(2));
 
 		return distribution;
 	}
 
 	public List<Integer> playRound(List<Integer> opponentRound) {
 
-		Integer n = selectLine(opponentRound);
+  	        Integer n;
+		if (availableRows.size() == 1){
+		        n = availableRows.get(0);
+		} else if (!home) {
+		        n = selectAwayLine(opponentRound);
+		} else {
+		        n = selectHomeLine(opponentRound);
+		}
+		System.out.println("selected line: " + n);
 		availableRows.remove(n);
 
 		List<Integer> round = distribution.get(n);
-
-        //TODO: make permutation work here 
-		if (opponentRound != null) {
+ 
+		if (home) {
 			round = bestPermutation(round, opponentRound);
 		}
-
+		
+		lineup.removePlayers(round);
 		return round;
 	}
-
-	public void clear() {
+    
+        public void clear() {
 		availableRows.clear();
 		for (int i = 0; i < 3; ++i)
-			availableRows.add(i);
+		    availableRows.add(i);
 	}
 
 	// This selects the best list to play for each round and returns its index in
 	// availableRows
 
-	public Integer selectLine(List<Integer> opponentRound) {
+	public Integer selectAwayLine(List<Integer> opponentRound) {
 
-		/*
-		 * If we are picking first, start with mid range line. The idea is to draw out
-		 * best or worst line againt mid tier players if they just max something, then
-		 * pick randomly (for now)
-		 */
+	    if (availableRows.size() != 3){
+		opponentLineup.removePlayers(opponentRound);
+	    }
 
-		if (opponentRound == null) {
+	    Line goodOpp = new Line(opponentLineup.valueList(), true);
+	    Line badHome = new Line(lineup.valueList(), false);
+	    
+	    GaleShapely(goodOpp, badHome);
+	    
+	    List<Integer> lineSkill = Arrays.asList(0, 0, 0);
 
-			List<Integer> lineSkill = Arrays.asList(0, 0, 0);
+	    for (Integer i : availableRows) {
+		lineSkill.set(i, badHome.score(distribution.get(i)));
+	    }
 
-			for (Integer i : availableRows) {
-				lineSkill.set(i, totalLineSkill(distribution.get(i)));
-			}
-
-			// this should return the mid-tier line or at least an available line
-			int zeroSkill = lineSkill.get(0);
-			int maxSkill = Math.max(lineSkill.get(1), lineSkill.get(2));
-
-			if (zeroSkill == 0) {
-				return lineSkill.indexOf(maxSkill);
-			} else {
-				if (maxSkill == 0) {
-					return lineSkill.indexOf(zeroSkill);
-				} else {
-					return lineSkill.indexOf(Math.min(zeroSkill, maxSkill));
-				}
-			}
+	    int maxScore = 0;
+	    for( int score : lineSkill ){
+		if (score > maxScore){
+		    maxScore = score;
 		}
-		/*
-		 * If we are picking second, pick line with that wins most (in case of tie, one
-		 * with fewer skill points)
-		 */
-		else {
-			// NOTE I think right now this might also be called as away team in rounds 2 and
-			// 3 but need to ask in class, not sure if we are passed row from previous round
-			// or null
-
-			List<Integer> lineWins = Arrays.asList(null, null, null);
-
-			for (Integer i : availableRows) {
-				lineWins.set(i, totalLineWins(distribution.get(i), opponentRound));
-			}
-
-			Integer bestRow = availableRows.get(0);
-			List<Integer> tie = new ArrayList<Integer>();
-			for (Integer i : availableRows) {
-
-				if (lineWins.get(i) > lineWins.get(bestRow)) {
-					bestRow = i;
-					tie.clear();
-				}
-
-				if (lineWins.get(i) == lineWins.get(bestRow) && i != bestRow) {
-					tie.add(bestRow);
-					tie.add(i);
-				}
-			}
-
-			if (tie.size() > 1) { // this does not currently consider three way ties
-				if (Math.min(totalLineSkill(distribution.get(tie.get(0))),
-						totalLineSkill(distribution.get(tie.get(1)))) == totalLineSkill(distribution.get(tie.get(0)))) {
-					return tie.get(0);
-				} else {
-					return tie.get(1);
-				}
-			} else {
-				return bestRow;
-			}
-		}
+	    }
+	    return lineSkill.indexOf(maxScore);
 	}
 
-	public Integer totalLineSkill(List<Integer> line) {
-		int skillLevel = 0;
+	public Integer selectHomeLine(List<Integer> opponentRound) {
 
-		for (Integer player : line) {
-			skillLevel += player;
+	    opponentLineup.removePlayers(opponentRound);
+	    
+	    if (availableRows.size() == 2){
+
+		
+		List<Integer> opponentNextRound = opponentLineup.valueList();
+
+		int chooseFirst = totalLineWins(distribution.get(availableRows.get(0)), opponentRound) + totalLineWins(distribution.get(availableRows.get(1)), opponentNextRound);
+		int chooseSecond = totalLineWins(distribution.get(availableRows.get(0)), opponentNextRound) + totalLineWins(distribution.get(availableRows.get(1)), opponentRound);
+
+		if(chooseFirst > chooseSecond){
+		    System.out.println(chooseFirst + "wins with first");
+		    return availableRows.get(0);
+		} else {
+		    System.out.println(chooseSecond + "wins with second");
+		    return availableRows.get(1);
 		}
+	    } else { //selecting first home line
 
-		return skillLevel;
+		List<Integer> opponentRemaining = opponentLineup.valueList();
+		List<Integer> lineScore = Arrays.asList(0, 0, 0);
+
+		System.out.println("Opponents remaining: " + opponentRemaining);
+		
+		for (Integer i : availableRows) { // 0-2
+		    Line temp = new Line(skills, true);
+		    temp.removePlayers(distribution.get(i));
+
+		    opponentLineup.clear();
+		    GaleShapely(temp, opponentLineup);
+		    
+		    lineScore.set(i, totalLineWins(distribution.get(i), opponentRound)+temp.score());
+		}
+		System.out.println("linescores: " + lineScore);
+
+		int maxScore = 0;
+		for(int i: lineScore){
+		    if (i > 0){
+			maxScore = i;
+		    }
+		}
+		return lineScore.indexOf(maxScore);
+	    }
 	}
+	
 
+    //        public Integer totalLineSkill(List<Integer> line) {
+    //		int skillLevel = 0;
+
+    ///		for (Integer player : line) {
+    //			skillLevel += player;
+    //		}
+
+    //  //		return skillLevel;
+    //	}
+//
 	public Integer totalLineWins(List<Integer> line, List<Integer> opponentLine) {
 		line = bestPermutation(line,  opponentLine);
 	       	int rowWins = 0;
 	       	
-	       	for(int j=0; j<5; j++){
+	       	for(int j=0; j<line.size(); j++){
 	       		if (line.get(j)-opponentLine.get(j) > 2) rowWins++;
 	       		if (line.get(j)-opponentLine.get(j) < -2) rowWins--;
 	       	}
