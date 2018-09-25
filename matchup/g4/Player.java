@@ -30,7 +30,7 @@ public class Player implements matchup.sim.Player {
 
     public Player() {
     	rand = new Random(seed);
-        Integer s[] = {1,1,1,1,1,8,8,8,8,8,9,9,9,9,9};
+        Integer s[] = {9,9,9,9,9,9,9,9,9,4,1,1,1,1,1};
         skills = new Skills(Arrays.asList(s));
 
         distribution = new ArrayList<List<Integer>>();
