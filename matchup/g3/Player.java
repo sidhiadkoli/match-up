@@ -5,10 +5,10 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Comparator;
 import matchup.sim.utils.*;
 import matchup.sim.Simulator;
+import java.util.Random;
 
 public class Player implements matchup.sim.Player {
 	private List<Integer> skills;
@@ -18,7 +18,7 @@ public class Player implements matchup.sim.Player {
 	private Random rand;
 	private Integer period = -1;
 	private boolean ishome = true;
-
+    private List<List<Integer>> pool;
 	//g8 par
     private List<Integer> prevskills;
     private List<Integer> Opponent;
@@ -75,6 +75,60 @@ public class Player implements matchup.sim.Player {
 
 
     public void init(String opponent) {
+    	pool = new ArrayList<>();
+		ArrayList<Integer> fixed = new ArrayList<>();
+		for(int i=0; i<3 ;i++){
+			fixed.add(10);
+			fixed.add(4);
+			fixed.add(7);
+			fixed.add(3);
+			fixed.add(6);
+		}
+
+		ArrayList<Integer> fixed1 = new ArrayList<>();
+		for(int i=0; i<5 ;i++){
+			fixed1.add(2);
+		}
+		for(int i=0; i<5 ;i++){
+			fixed1.add(6);
+		}
+		for(int i=0; i<5 ;i++){
+			fixed1.add(10);
+		}
+
+		ArrayList<Integer> fixed2 = new ArrayList<>();
+		for(int i=0 ;i< 15; i++){
+			fixed2.add(6);
+		}
+
+		ArrayList<Integer> fixed3 = new ArrayList<>();
+		for(int i=0; i<5 ;i++){
+			fixed3.add(2);
+		}
+		for(int i=0; i<5 ;i++){
+			fixed3.add(7);
+		}
+		for(int i=0; i<5 ;i++){
+			fixed3.add(9);
+		}
+
+		ArrayList<Integer> fixed4 = new ArrayList<>();
+		for(int i=0; i<5 ;i++){
+			fixed4.add(1);
+		}
+		for(int i=0; i<5 ;i++){
+			fixed4.add(8);
+		}
+		for(int i=0; i<5 ;i++){
+			fixed4.add(9);
+		}
+
+		pool.add(fixed);
+		pool.add(fixed1);
+		pool.add(fixed2);
+		pool.add(fixed3);
+		pool.add(fixed4);
+
     }
 
     private double calVar(List<Integer> s){
@@ -90,103 +144,107 @@ public class Player implements matchup.sim.Player {
         return sqSum/15;
     }
 	public List<Integer> getSkills() {
-	skills.clear();
-	List<Game> games = History.getHistory();
-	game_num = games.size();
-	ArrayList<Integer> fixed = new ArrayList<>();
-	if(game_num == 0){
-	    for(int i=0; i<3 ;i++){
-	            fixed.add(10);
-	            fixed.add(4);
-	            fixed.add(7);
-	            fixed.add(3);
-	            fixed.add(6);
-        }
-        skills = fixed;
-	    return skills;
-    }
-	if(game_num==1){
-        for(int i=0; i<5 ;i++){
-            fixed.add(2);
-        }
-		for(int i=0; i<5 ;i++){
-			fixed.add(6);
-		}
-		for(int i=0; i<5 ;i++){
-			fixed.add(10);
-		}
-        skills = fixed;
-        return skills;
-    }
-    if(game_num==2){
-			for(int i=0; i<5 ;i++){
-				fixed.add(1);
-			}
-			for(int i=0; i<5 ;i++){
-				fixed.add(8);
-			}
-			for(int i=0; i<5 ;i++){
-				fixed.add(9);
-			}
-			skills = fixed;
-			return skills;
-    }
-    if(game_num==3){
-			for(int i=0; i<5 ;i++){
-				fixed.add(2);
-			}
-			for(int i=0; i<5 ;i++){
-				fixed.add(7);
-			}
-			for(int i=0; i<5 ;i++){
-				fixed.add(9);
-			}
-			skills = fixed;
-			return skills;
-    }
-    if(game_num==4){
-			for(int i=0; i<5 ;i++){
-				fixed.add(2);
-			}
-			for(int i=0; i<5 ;i++){
-				fixed.add(6);
-			}
-			for(int i=0; i<5 ;i++){
-				fixed.add(10);
-			}
-			skills = fixed;
-			return skills;
-    }
-   // System.out.println(games.size()-1);
-    Game g_end = History.getLastGame();
-   // System.out.println(games.size()-3);
-	Game g_start = games.get(games.size()-3); // something went wrong with the simulator
-	PlayerData pd_e = (!g_end.playerA.name.equals("g3"))?g_end.playerA:g_end.playerB;
-	PlayerData pd_s = (!g_start.playerA.name.equals("g3"))?g_start.playerA:g_start.playerB;
-	List<Integer> sk_e=pd_e.skills;
-	List<Integer> sk_s=pd_s.skills;
-    System.out.println(sk_e);
-    System.out.println(sk_s);
-    System.out.println(games.size());
-	if(game_num>4 && game_num<10 && Math.abs(calVar(sk_e)-calVar(sk_s))>=(2.0/3) ){
-	    for(int i=0 ;i< 15; i++){
-
-	        fixed.add(6);
-
-        }
-
-	    skills = fixed;
-	    return skills;
-    }
-    if(period ==-1 && game_num<=6)
-    	period = 1;
-    if(period ==-1)
-        period = game_num-7;
-
-    System.out.println("here");
-    sk_e = getNewPeriod();
-    skills = getNew();
-    return skills;
+    	skills.clear();
+		Random random = new Random();
+		skills = pool.get(random.nextInt(5));
+		return skills;
+//	skills.clear();
+//	List<Game> games = History.getHistory();
+//	game_num = games.size();
+//	ArrayList<Integer> fixed = new ArrayList<>();
+//	if(game_num == 0){
+//	    for(int i=0; i<3 ;i++){
+//	            fixed.add(10);
+//	            fixed.add(4);
+//	            fixed.add(7);
+//	            fixed.add(3);
+//	            fixed.add(6);
+//        }
+//        skills = fixed;
+//	    return skills;
+//    }
+//	if(game_num==1){
+//        for(int i=0; i<5 ;i++){
+//            fixed.add(2);
+//        }
+//		for(int i=0; i<5 ;i++){
+//			fixed.add(6);
+//		}
+//		for(int i=0; i<5 ;i++){
+//			fixed.add(10);
+//		}
+//        skills = fixed;
+//        return skills;
+//    }
+//    if(game_num==2){
+//			for(int i=0; i<5 ;i++){
+//				fixed.add(1);
+//			}
+//			for(int i=0; i<5 ;i++){
+//				fixed.add(8);
+//			}
+//			for(int i=0; i<5 ;i++){
+//				fixed.add(9);
+//			}
+//			skills = fixed;
+//			return skills;
+//    }
+//    if(game_num==3){
+//			for(int i=0; i<5 ;i++){
+//				fixed.add(2);
+//			}
+//			for(int i=0; i<5 ;i++){
+//				fixed.add(7);
+//			}
+//			for(int i=0; i<5 ;i++){
+//				fixed.add(9);
+//			}
+//			skills = fixed;
+//			return skills;
+//    }
+//    if(game_num==4){
+//			for(int i=0; i<5 ;i++){
+//				fixed.add(2);
+//			}
+//			for(int i=0; i<5 ;i++){
+//				fixed.add(6);
+//			}
+//			for(int i=0; i<5 ;i++){
+//				fixed.add(10);
+//			}
+//			skills = fixed;
+//			return skills;
+//    }
+//   // System.out.println(games.size()-1);
+//    Game g_end = History.getLastGame();
+//   // System.out.println(games.size()-3);
+//	Game g_start = games.get(games.size()-3); // something went wrong with the simulator
+//	PlayerData pd_e = (!g_end.playerA.name.equals("g3"))?g_end.playerA:g_end.playerB;
+//	PlayerData pd_s = (!g_start.playerA.name.equals("g3"))?g_start.playerA:g_start.playerB;
+//	List<Integer> sk_e=pd_e.skills;
+//	List<Integer> sk_s=pd_s.skills;
+//    System.out.println(sk_e);
+//    System.out.println(sk_s);
+//    System.out.println(games.size());
+//	if(game_num>4 && game_num<10 && Math.abs(calVar(sk_e)-calVar(sk_s))>=(2.0/3) ){
+//	    for(int i=0 ;i< 15; i++){
+//
+//	        fixed.add(6);
+//
+//        }
+//
+//	    skills = fixed;
+//	    return skills;
+//    }
+//    if(period ==-1 && game_num<=6)
+//    	period = 1;
+//    if(period ==-1)
+//        period = game_num-7;
+//
+//    System.out.println("here");
+//    sk_e = getNewPeriod();
+//    skills = getNew();
+//    return skills;
 	}
     //g8 counter start
     private List<Integer> playSevens()
