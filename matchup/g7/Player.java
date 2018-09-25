@@ -51,16 +51,26 @@ public class Player implements matchup.sim.Player {
 						// Step-based evaluation, +1 for win and -1 for lose
 						if ((x[i] > 11.0D) || (x[i] < 1.0D))
 							return -Double.MAX_VALUE / 2;
-						else if (x[i] >= j + 3)
+						else if (x[i] - 1 >= j + 3)
 							score += dic[i][j];
-						else if (x[i] < j - 2)
+						else if (x[i] - 1 < j - 2)
 							score -= dic[i][j];
+						/*
+						if ((x[i] > 11.0D) || (x[i] < 1.0D))
+							return -Double.MAX_VALUE / 2;
+						else if (x[i] >= j + 3)
+							score += dic[i][j] * (11 - x[i]);
+						else if (x[i] < j - 2)
+							score += dic[i][j] * (j - 3 - x[i]);
+						else 
+							score += dic[i][j] * (j + 2 - x[i]);
+						*/
 					}
 				}
 				return score;
 			}
 		};
-		swarm = new Swarm(50, 15, 0.7D, 0.3D, 0.10D, ev);
+		swarm = new Swarm(50, 15, 0.7D, 0.3D, 0.15D, ev);
 	}
 	
 	@Override
@@ -90,9 +100,9 @@ public class Player implements matchup.sim.Player {
 			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(10), skills.get(11), skills.get(12), skills.get(13), skills.get(14))));
 		}
 		else {
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(1), skills.get(2), skills.get(3), skills.get(4), skills.get(5))));
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(6), skills.get(7), skills.get(8), skills.get(9), skills.get(10))));
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(11), skills.get(12), skills.get(13), skills.get(14), skills.get(0))));
+			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(0), skills.get(3), skills.get(6), skills.get(9), skills.get(12))));
+			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(1), skills.get(4), skills.get(7), skills.get(10), skills.get(13))));
+			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(2), skills.get(5), skills.get(8), skills.get(11), skills.get(14))));
 		}
 
 		for (int i=0; i<distribution.size(); i++){
@@ -138,7 +148,7 @@ public class Player implements matchup.sim.Player {
 				List<Integer> line = opponentDistribution.get(i);
 				Collections.sort(line);
 				for (int j = 0; j < line.size(); j++) {
-					dic[5 * i + j][line.get(j)] += (2 / rounds);
+					dic[5 * i + j][line.get(j) - 1] += (2 / rounds);
 					for (int k = 0; k < dic[5 * i + j].length; k++) {
 						dic[5 * i + j][k] /= ((rounds + 2) / rounds);
 					}
@@ -156,15 +166,27 @@ public class Player implements matchup.sim.Player {
 						// Step-based evaluation, +1 for win and -1 for lose
 						if ((x[i] > 11.0D) || (x[i] < 1.0D))
 							return -Double.MAX_VALUE / 2;
-						else if (x[i] >= j + 3)
+						else if (x[i] - 1 >= j + 3)
 							score += dic[i][j];
-						else if (x[i] < j - 2)
+						else if (x[i] - 1 < j - 2)
 							score -= dic[i][j];
+						/*
+						if ((x[i] > 11.0D) || (x[i] < 1.0D))
+							return -Double.MAX_VALUE / 2;
+						else if (x[i] >= j + 3)
+							score += dic[i][j] * (11 - x[i]);
+						else if (x[i] < j - 2)
+							score += dic[i][j] * (j - 3 - x[i]);
+						else 
+							score += dic[i][j] * (j + 2 - x[i]);
+							*/
+						
 					}
 				}
 				return score;
 			}
 		});
+		
 		swarm.update(200);
 		System.out.println(swarm.globalBest);
 		skills = Arrays.stream(swarm.normalizeGlobal()).boxed().collect(Collectors.toList());

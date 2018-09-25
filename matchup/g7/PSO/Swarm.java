@@ -98,6 +98,8 @@ public class Swarm {
 	
 	// Time efficiency: t * n * d
 	public void update(int epoches) {
+		if (globalBest < -100000.0D)
+			initParticles();
 		for (int i = 0; i < epoches; i++) {
 			for (Particle p : particles) {
 				// Update the particle's position
@@ -107,9 +109,10 @@ public class Swarm {
 				// Update the particle's velocity vector
 				double deltaV[] = new double[d];
 				double randG = rd.nextDouble(), randL = rd.nextDouble();
+				double random[] = randomVectorWithinRange();
 				for (int j = 0; j < d; j++) {
 					deltaV[j] = wg * randG * (globalx[j] - p.x[j]) + 
-							wl * randL * (p.getLocalX()[j] - p.x[j]);
+							wl * randL * (p.getLocalX()[j] - p.x[j]) + random[j];
 				}
 				p.updateVelocity(deltaV);
 				// Update local best and global best
@@ -165,8 +168,9 @@ public class Swarm {
 		}
 		
 		for (int i = 0; i < d; i++) {
-			v[i] /= sum * 5.0D;
-			v[i] -= 5.0D / d;
+			v[i] /= sum;
+			v[i] -= 1.0D / d;
+			v[i] *= 10.0D;
 		}
 		
 		return v;
@@ -193,15 +197,19 @@ public class Swarm {
 			}
 		return maxIndex;
 	}
-	/*
+	
 	public static void main(String[] args) {
 		Swarm swarm = new Swarm(20, 15, 0.7, 0.3, 0.5, x -> (x[11] - x[0]));
 		double sum = 0;
+		double max = -10;
 		for (double entry : swarm.randomVectorWithinRange()) {
 			sum += entry;
+			if (entry > max)
+				max = entry;
 		}
 		//for (int entry : swarm.normalizeGlobal())
+		System.out.println(max);
 		System.out.println(sum);
 	}
-	*/
+	
 }
