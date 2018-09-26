@@ -25,7 +25,10 @@ public class Player implements matchup.sim.Player {
 	private double dic[][] = new double[15][11];
 	private List<List<Integer>> opponentDistribution;
 	private int rounds = 0;
-	
+    // add counter variance strategies
+    private List<Float> home_line;
+    private float opponentVar;
+
 	private FitnessEvaluation ev;
 	private Swarm swarm;
 	
@@ -75,7 +78,8 @@ public class Player implements matchup.sim.Player {
 	
 	@Override
 	public void init(String opponent) {
-		//skills = stat();
+        home_line = new ArrayList<Float>();
+        opponentVar = 0;
 	}
 
 
@@ -92,20 +96,16 @@ public class Player implements matchup.sim.Player {
 		state = isHome;
 		distribution = new ArrayList<List<Integer>>();
 		this.opponentRemainSkills = new ArrayList<Integer>(opponentSkills);
+		opponentVar = findVariance(opponentSkills);
 
 		if (isHome) {
-			List<Integer> temp = new ArrayList<Integer>();
-
 			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(0), skills.get(1), skills.get(2), skills.get(3), skills.get(4))));
 			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(5), skills.get(6), skills.get(7), skills.get(8), skills.get(9))));
 			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(10), skills.get(11), skills.get(12), skills.get(13), skills.get(14))));
 		}
 		else {
-			// TODO away team counter variance
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(1), skills.get(2), skills.get(3), skills.get(4), skills.get(5))));
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(6), skills.get(7), skills.get(8), skills.get(9), skills.get(10))));
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(11), skills.get(12), skills.get(13), skills.get(14), skills.get(0))));
-		}
+            distribution = counter_var(home_line);
+        }		
 
 		for (int i=0; i<distribution.size(); i++){
 			averageStrength.add(findAverage(distribution.get(i)));
@@ -123,13 +123,43 @@ public class Player implements matchup.sim.Player {
     	return sum;
 	}
 
-
 	/**
-	 * Compute the optimal distribution to counter against the opponent based on dic
+	 * Compute the optimal distribution to counter against the opponent based on variance
 	 * @param row The index of our line used
 	 * @param opponentRound The list of player skills in the opponent line
 	 * @return a pair containing score difference and the optimal permutation
 	 */
+	
+    public List<List<Integer>> counter_var(List<Float> line){
+        float sum = 0;
+        for (Float i : line)
+            sum = sum + i;
+        List<List<Integer>> result = new ArrayList<List<Integer>>();
+        if (sum > 0){
+            Collections.sort(skills);
+            for (int i=0 ; i< 3; i++){
+                List<Integer> temp = new ArrayList<Integer>();
+                for (int j=0; j<5; j++){
+                    temp.add(skills.get(i*5+j));
+                }
+                result.add(temp);
+            }
+        }
+        else{
+            Collections.sort(skills);
+            for (int i=0 ; i< 3; i++){
+                List<Integer> temp = new ArrayList<Integer>();
+                for (int j=0; j<5; j++){
+                    temp.add(skills.get(i+j*3));
+                }
+                result.add(temp);
+            }
+
+        }
+        return result;
+    }
+    
+
 	private void logHistory() {
 		if (opponentDistribution.size() != 0) {
 			Collections.sort(opponentDistribution, (l1, l2) -> {
@@ -332,6 +362,9 @@ public class Player implements matchup.sim.Player {
     	else{
 	    	round =	distribution.get(availableRows.get(0));
     		availableRows.remove(0);
+            if (opponentRound!=null){
+                home_line.add(findVariance(opponentRound)-opponentVar);
+            }
     	}
 		return round;
 	}
