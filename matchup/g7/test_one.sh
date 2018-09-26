@@ -6,8 +6,7 @@
 
 ROUNDS=$1
 
-#for OPP in `echo g1 g2 g3 g4 g5 g6 g8 random`;
-for OPP in `echo g5`;
+for OPP in `echo g1 g2 g3 g4 g5 g6 g8 random`;
 do
     WINS=0
     TIES=0
