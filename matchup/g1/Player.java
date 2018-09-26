@@ -15,15 +15,25 @@ public class Player implements matchup.sim.Player {
     private boolean globalIsHome;
 
     private List<Integer> availableRows;
+    private List<List<Integer>> seenTeams;	
 
     private Random rand;
-    
+    private int roundNum;
+    private int usedResources;
+
     public Player() {
 	    rand = new Random();
 	    skills = new ArrayList<Integer>();
 	    distribution = new ArrayList<List<Integer>>();
 	    availableRows = new ArrayList<Integer>();
 	    for (int i=0; i<3; ++i) availableRows.add(i);
+
+	   seenTeams = new ArrayList<List<Integer>>();  
+           for (int i = 0; i < 3; i++) {
+		List<Integer> row = new ArrayList<Integer>();
+		seenTeams.add(row);
+	   }
+	   roundNum = 0;
     }
     
     public void init(String opponent) {
@@ -203,20 +213,30 @@ public class Player implements matchup.sim.Player {
         int bestLineup = 0;
         int secondBest = 0;
         int bestScore = -6;
-        
-        if (lineupCount == 3) {
-            bestScore = 6;
-            for (int i = 0; i < lineupCount; i++) {
-                List<Integer> round = new ArrayList<Integer>(distribution.get(availableRows.get(i))); 
-                int score = checkLineupScore(round, opponentRound);
-                if (score < bestScore) {
-                    secondBest = bestLineup;
-                    bestLineup = i;
-                    bestScore = score;
-                }
+
+	if (roundNum == 0) {
+	    for(int i=0; i < 5; i++){
+		usedResources += opponentRound.get(i);
+	    }
+		
+	    int friendlyResources = 0;
+	    int minVal = 90;
+            int minIndex = 0;
+	    for (int i = 0; i < lineupCount; i++) {
+		minVal = 90;
+		minIndex = 0;
+		List<Integer> round = new ArrayList<Integer>(distribution.get(availableRows.get(i))); 
+                for (int j = 0; j < 5; j++) {
+		    friendlyResources += round.get(j);
+		}
+		if (friendlyResources < minVal) {
+		    minVal = friendlyResources;	
+		    minIndex = i;
+		}
+		
             }
-            return secondBest;
-        } else {
+            return minIndex;
+        } else if (roundNum == 1) {
             for (int i = 0; i < lineupCount; i++) {
                 List<Integer> round = new ArrayList<Integer>(distribution.get(availableRows.get(i))); 
                 int score = checkLineupScore(round, opponentRound);
@@ -226,21 +246,59 @@ public class Player implements matchup.sim.Player {
                 }
             }
             return bestLineup;
-        }
+        } else {
+	    return 0;	    
+	}
       
     }
  
     public List<Integer> playRound(List<Integer> opponentRound) {
+	    if (!globalIsHome) {
+		int lineUpCount = availableRows.size();
 
-		if (!globalIsHome) {
-
-            int n = rand.nextInt(availableRows.size());
-            List<Integer> round = new ArrayList<Integer>(distribution.get(availableRows.get(n)));
-            availableRows.remove(n);
-           
-	    return round;
+		roundNum = 0; 
+		for(int i=0; i < 3; i++) {
+		    seenTeams.get(i).clear();
 		}
-	
+		usedResources = 0;
+		if (lineUpCount == 3) {
+			int friendlyResources = 0;
+			int minVal = 90;
+			int minIndex = 0;
+			for (int i = 0; i < lineUpCount; i++) {
+			    minVal = 90;
+			    minIndex = 0;
+			    List<Integer> round = new ArrayList<Integer>(distribution.get(availableRows.get(i)));
+			    for (int j = 0; j < 5; j++) {
+				friendlyResources += round.get(i);
+			    }
+			    if (friendlyResources < minVal) {
+				minVal = friendlyResources;
+				minIndex = i;
+			    }
+			}
+
+			List<Integer> round = new ArrayList<Integer>(distribution.get(availableRows.get(minIndex)));
+                        availableRows.remove(minIndex);
+                        return round;
+
+                 } else {
+                 
+			int n = rand.nextInt(availableRows.size());
+
+		        List<Integer> round = new ArrayList<Integer>(distribution.get(availableRows.get(n)));
+       			availableRows.remove(n);
+
+			return round;
+                 }
+
+	    }
+		List<Integer> row = seenTeams.get(roundNum);
+		for (int i=0; i < 5; i++) {
+		    row.add(opponentRound.get(i));
+		}
+		System.out.println(seenTeams);
+
 		int n = chooseOptimalLineup(opponentRound);
 
 		List<Integer> round = new ArrayList<Integer>(distribution.get(availableRows.get(n)));
@@ -252,6 +310,7 @@ public class Player implements matchup.sim.Player {
 		}
 
 		round = permuteHomeTeam(round, opponentRound);
+		roundNum++;
 		return bestTeam;
 	
     }
@@ -318,7 +377,7 @@ public class Player implements matchup.sim.Player {
 			}
 			}
 			
-			
+		        roundNum = 0;	
 			System.out.println("end result:");
 
 			System.out.println("home:");
