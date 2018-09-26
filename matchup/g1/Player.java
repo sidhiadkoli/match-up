@@ -75,7 +75,7 @@ public class Player implements matchup.sim.Player {
 		{
 			game = games.get(i);
 		
-			if (game.playerA.name == "g1") {
+			if (game.playerA.name.equals("g1")) {
 					friendly = game.playerA;
 					opponent = game.playerB;
 			} else {
