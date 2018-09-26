@@ -934,7 +934,7 @@ public class Player implements matchup.sim.Player {
 	    List<Integer> opponentRemaining = opponentLineup.valueList();
 	    List<Integer> lineScore = Arrays.asList(0, 0, 0);
 	    
-	    System.out.println("Opponents remaining: " + opponentRemaining);
+	    //System.out.println("Opponents remaining: " + opponentRemaining);
 	    
 	    for (Integer i : availableRows) { // 0-2
 		Line temp = new Line(skills, true);
@@ -943,31 +943,21 @@ public class Player implements matchup.sim.Player {
 		opponentLineup.clear();
 		GaleShapely(temp, opponentLineup);
 		
-		lineScore.set(i, totalLineWins(distribution.get(i), opponentRound)+temp.score());
+		lineScore.set(i, temp.score()-5*totalLineWins(distribution.get(i), opponentRound));
 	    }
 	    //System.out.println("linescores: " + lineScore);
 	    
-	    int maxScore = 0;
+	    int minScore = 1000;
 	    for(int i: lineScore){
-		if (i > 0){
-		    maxScore = i;
+		if (i < minScore){
+		    minScore = i;
 		}
 	    }
-	    return lineScore.indexOf(maxScore);
+	    return lineScore.indexOf(minScore);
 	}
     }
     
     
-    //        public Integer totalLineSkill(List<Integer> line) {
-    //		int skillLevel = 0;
-    
-    ///		for (Integer player : line) {
-    //			skillLevel += player;
-    //		}
-    
-    //  //		return skillLevel;
-    //	}
-    //
     public Integer totalLineWins(List<Integer> line, List<Integer> opponentLine) {
 	line = bestPermutation(line,  opponentLine);
 	int rowWins = 0;
