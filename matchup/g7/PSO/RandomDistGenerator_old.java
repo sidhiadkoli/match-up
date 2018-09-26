@@ -5,6 +5,7 @@ import javafx.util.Pair;
 public class RandomDistGenerator_old {
 	// Inspired by Mike Housky on StackOverflow:
 	// https://stackoverflow.com/questions/18448417/create-constrained-random-numbers/18448874#18448874
+	// It is not used in the implementation
 	
 	public RandomDistGenerator_old(Pair<Integer, Integer>[] range, int target) {
 		// TODO

@@ -24,7 +24,7 @@ public class Player implements matchup.sim.Player {
 	// keep track of history distribution
 	private double dic[][] = new double[15][11];
 	private List<List<Integer>> opponentDistribution;
-	private int rounds = 1;
+	private int rounds = 0;
 	
 	private FitnessEvaluation ev;
 	private Swarm swarm;
@@ -32,8 +32,7 @@ public class Player implements matchup.sim.Player {
 	private boolean state; // Whether the player is playing as the home team
 	
 	public Player() {
-		// TODO Find out a good skill set
-		skills = new ArrayList<Integer>(Arrays.asList(1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9));
+		skills = new ArrayList<Integer>(Arrays.asList(1, 2, 2, 2, 3, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9));
 		availableRows = new ArrayList<Integer>(Arrays.asList(0, 1, 2));
 		averageStrength = new ArrayList<Float>();
 		opponentDistribution = new ArrayList<List<Integer>>();
@@ -70,7 +69,8 @@ public class Player implements matchup.sim.Player {
 				return score;
 			}
 		};
-		swarm = new Swarm(50, 15, 0.7D, 0.3D, 0.15D, ev);
+		
+		swarm = new Swarm(200, 15, 0.7D, 0.3D, 0.2D, ev);
 	}
 	
 	@Override
@@ -81,13 +81,14 @@ public class Player implements matchup.sim.Player {
 
 	@Override
 	public List<Integer> getSkills() {
-		logHistory();
+		rounds++;
+		if (rounds > 1)
+			logHistory();
 		return skills;
 	}
 
 	@Override
 	public List<List<Integer>> getDistribution(List<Integer> opponentSkills, boolean isHome) {
-		// TODO Come up with a way to form distribution against opponentSkills and the team position
 		state = isHome;
 		distribution = new ArrayList<List<Integer>>();
 		this.opponentRemainSkills = new ArrayList<Integer>(opponentSkills);
@@ -100,9 +101,10 @@ public class Player implements matchup.sim.Player {
 			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(10), skills.get(11), skills.get(12), skills.get(13), skills.get(14))));
 		}
 		else {
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(0), skills.get(3), skills.get(6), skills.get(9), skills.get(12))));
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(1), skills.get(4), skills.get(7), skills.get(10), skills.get(13))));
-			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(2), skills.get(5), skills.get(8), skills.get(11), skills.get(14))));
+			// TODO away team counter variance
+			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(1), skills.get(2), skills.get(3), skills.get(4), skills.get(5))));
+			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(6), skills.get(7), skills.get(8), skills.get(9), skills.get(10))));
+			distribution.add(new ArrayList<Integer>(Arrays.asList(skills.get(11), skills.get(12), skills.get(13), skills.get(14), skills.get(0))));
 		}
 
 		for (int i=0; i<distribution.size(); i++){
@@ -130,7 +132,6 @@ public class Player implements matchup.sim.Player {
 	 */
 	private void logHistory() {
 		if (opponentDistribution.size() != 0) {
-			//print("bp4");
 			Collections.sort(opponentDistribution, (l1, l2) -> {
 				if (findAverage(l1) > findAverage(l2))
 					return 1;
@@ -154,7 +155,6 @@ public class Player implements matchup.sim.Player {
 					}
 				}
 			}
-			rounds++;
 			opponentDistribution.clear();
 		}
 		swarm.updateEv(new FitnessEvaluation() {
@@ -187,8 +187,8 @@ public class Player implements matchup.sim.Player {
 			}
 		});
 		
-		swarm.update(200);
-		System.out.println(swarm.globalBest);
+		swarm.update(50);
+		//System.out.println(swarm.globalBest);
 		skills = Arrays.stream(swarm.normalizeGlobal()).boxed().collect(Collectors.toList());
 	}
 	
@@ -247,7 +247,8 @@ public class Player implements matchup.sim.Player {
 				best_lineup = all_possible.get(i);
 			}
 		}
-		return new Pair<Integer, List<Integer>>(best_score,best_lineup); 
+		//System.out.println(best_score);
+		return new Pair<Integer, List<Integer>>(best_score, best_lineup); 
 	}
 
 	private int ComputeScore(List<Integer> line1, List<Integer> line2){
@@ -276,8 +277,9 @@ public class Player implements matchup.sim.Player {
 		
 		private void permuteRow(List<Integer> availableRows, int l, int score) {
 			if (l != 0)
-	        score += permutation(availableRows.get(l - 1), opponentRemainDist.get(l - 1)).getKey();
+				score += permutation(availableRows.get(l - 1), opponentRemainDist.get(l - 1)).getKey();
 			if (l == availableRows.size()) {
+				//System.out.println("total score:" + score);
 				if (score > maxScore) {
 					maxScore = score;
 					bestLine = availableRows.get(0);
@@ -286,7 +288,7 @@ public class Player implements matchup.sim.Player {
 	        else {
 	            for (int i = l; i < availableRows.size(); i++) {
 	                swap(availableRows, l, i);
-	                permuteRow(availableRows, l + 1, availableRows.size()); 
+	                permuteRow(availableRows, l + 1, score); 
 	                swap(availableRows, l, i); 
 	            } 
 	        } 

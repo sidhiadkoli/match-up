@@ -55,6 +55,7 @@ public class Swarm {
 				return initDistribution();
 		}
 		
+		
 		/*sum = 0;
 		for (int i = 0; i < d; i++) {
 			sum += dist[i];
