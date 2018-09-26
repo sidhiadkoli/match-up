@@ -73,7 +73,7 @@ public class Player implements matchup.sim.Player {
 			}
 		};
 		
-		swarm = new Swarm(250, 15, 0.7D, 0.3D, 0.2D, ev);
+		swarm = new Swarm(400, 15, 0.7D, 0.3D, 0.25D, ev);
 	}
 	
 	@Override
@@ -217,7 +217,7 @@ public class Player implements matchup.sim.Player {
 			}
 		});
 		
-		swarm.update(80);
+		swarm.update(50);
 		//System.out.println(swarm.globalBest);
 		skills = Arrays.stream(swarm.normalizeGlobal()).boxed().collect(Collectors.toList());
 	}
