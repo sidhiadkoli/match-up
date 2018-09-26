@@ -28,9 +28,17 @@ public class Player implements matchup.sim.Player {
     private int seed = 64;
     private Random rand;
 
+    private int totalTies = 0;
+    private int totalWins = 0;
+    private int totalLoss = 0;
+    private int currTies = 0;
+    private int currWins = 0;
+    private int currLoss = 0;
+
+
     public Player() {
     	rand = new Random(seed);
-        Integer s[] = {1,1,1,1,1,8,8,8,8,8,9,9,9,9,9};
+        Integer s[] = {9,9,9,9,9,9,9,9,9,4,1,1,1,1,1};
         skills = new Skills(Arrays.asList(s));
 
         distribution = new ArrayList<List<Integer>>();
@@ -45,13 +53,10 @@ public class Player implements matchup.sim.Player {
 
     public List<Integer> getSkills() {
         if (stats != null) {
-			stats.update();
-
-			if (stats.doCounter()) {
-				skills = stats.getCounter();
-			}
+        	stats.update();
+            skills = stats.getSkills();   
 		}
-
+        
 		return skills;
     }
 

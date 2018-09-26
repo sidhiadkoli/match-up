@@ -3,6 +3,7 @@ package matchup.g4;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Arrays;
 
 // To get game history.
 import matchup.sim.utils.*;
@@ -10,22 +11,96 @@ import matchup.sim.utils.*;
 class Stats {
 
 	private List<Game> games;
-	private List<Integer> predOppSkills;
+	private Skills predOppSkills;
+    private List<List<Integer>> opskills;
 	private boolean isPlayerA;
+    private Skills curSkills;
 	private int lossStreak;
+    private boolean doCounter;
+    private int counterTimer;
+
+    public int totalTies;
+    public int totalWins;
+    public int totalLoss;
+    public int currTies;
+    public int currWins;
+    public int currLoss;
 
 	public Stats() {
 		games = History.getHistory();
-		isPlayerA = games.get(0).playerA.name.equals("g4");
-
+		isPlayerA = games.get(0).playerA.name.equals("g4");    
+        doCounter = false; 
+        counterTimer = 0;
 		lossStreak = 0;
+        totalTies = 0;
+        totalWins = 0;
+        totalLoss = 0;
+        currTies = 0;
+        currWins = 0;
+        currLoss = 0;
+        Integer s[] = {9,9,9,9,9,9,9,9,9,4,1,1,1,1,1};
+        curSkills = new Skills(Arrays.asList(s));
 	}
+
+    public Skills getSkills() {
+        return curSkills;
+    }
 
 	public void update() {
 		games = History.getHistory();
         checkLoss();
+
+        if (doCounter) {
+            if (counterTimer == 0) {
+                curSkills = new Skills(counter(counter(curSkills)));
+            } else {
+                counterTimer--;
+            }
+        }
+
+        if (lossStreak >= 3) {
+            doCounter = false;
+            doLoss();
+            checkCounterStrategy();
+
+            if(doCounter) {
+                curSkills = new Skills(counter(counter(curSkills)));
+            } else if (isConverging()) {
+                curSkills = new Skills(counter(predOppSkills));
+            } else {
+                Integer s[] = {9,9,9,9,9,9,9,9,9,4,1,1,1,1,1};
+                curSkills = new Skills(Arrays.asList(s));
+            }
+
+            reset();
+        }
 	}
 
+	
+	public boolean isEqualList(List<Integer> list1, List<Integer> list2){
+		List<Integer> one = new ArrayList<Integer>(list1); 
+	    List<Integer> two = new ArrayList<Integer>(list2);   
+	    Collections.sort(one);
+    	Collections.sort(two);      
+    	return one.equals(two);
+	}
+
+	public void checkCounterStrategy(){
+		int length = currWins + currTies + currLoss;
+        if(length==4){
+            doCounter = true;
+            counterTimer = 0;      
+        }
+        else if (length==5){
+            doCounter = true;
+            counterTimer = 1; 
+        }
+        else if (length==6){
+            doCounter = true;
+            counterTimer = 2; 
+        }
+	}
+	
 	private void checkLoss() {
         int lastScoreA = games.get(games.size()-1).playerA.score + games.get(games.size()-2).playerA.score;
         int lastScoreB = games.get(games.size()-1).playerB.score + games.get(games.size()-2).playerB.score;
@@ -34,49 +109,49 @@ class Stats {
 
         if (lastScore < 0) { //lost last game
             lossStreak ++;
-        } else {
+            totalLoss ++;
+            currLoss ++;
+        } else if (lastScore > 0){ //won
             lossStreak = 0; //reset
+            totalWins ++;
+            currWins ++;
+        } else { //tie
+            lossStreak = 0;
+            totalTies ++;
+            currTies ++;
         }
     }
 
-    public boolean doCounter() {
-    	return lossStreak >= 3;
-    }
+    private void doLoss() {
+        opskills = new ArrayList<List<Integer>>();
 
-    public Skills getCounter() {
-    	lossStreak = 0; // reset, give new strategy a chance to win
-
-        List<List<Integer>> opskills = new ArrayList<List<Integer>>();
-
-    	if (isPlayerA) {
-    		for (int i = 5; i > 0; i -= 2) {
-    			opskills.add(games.get(games.size()-i).playerB.skills);
-    		}
-    	} else {
-    		for (int i = 5; i > 0; i -= 2) {
-    			opskills.add(games.get(games.size()-i).playerA.skills);
-    		}
-    	}
+        if (isPlayerA) {
+            for (int i = 5; i > 0; i -= 2) {
+                opskills.add(games.get(games.size()-i).playerB.skills);
+            }
+        } else {
+            for (int i = 5; i > 0; i -= 2) {
+                opskills.add(games.get(games.size()-i).playerA.skills);
+            }
+        }
         
-
-        List<Integer> predOppSkills = new ArrayList<Integer>();
+        predOppSkills = new Skills();
 
         for (int i=0;i<15;i++) {
             List<Integer> temp = new ArrayList<Integer>();
             for (int j = 0; j < 3; j++) {
-            	temp.add(opskills.get(j).get(i));
+                temp.add(opskills.get(j).get(i));
             }
 
             predOppSkills.add(maxmode(temp));
         }
+    }
 
-        for (int i = 0; i < 3; i++) {
-        	System.out.println(opskills.get(i));
-        }
-        System.out.println("predicted:");
-        System.out.println(predOppSkills);
-
-        return new Skills(counter(predOppSkills));
+    private void reset() {
+        lossStreak = 0; // reset, give new strategy a chance to win
+        currLoss = 0;
+        currWins = 0;
+        currTies = 0;
     }
 
     private int maxmode(List<Integer> arr) {
@@ -129,7 +204,7 @@ class Stats {
                 }
             }
         }
-        else if (sum<90){
+        else if (sum<90) {
             int difference = 90-sum;
             int i=0;
             while(difference != 0){
@@ -143,5 +218,16 @@ class Stats {
             }
         }
         return opponentSkills;
+    }
+
+    private boolean isConverging() {
+        int total = 0;
+
+        for (int i = 0; i < 3; i++) {
+            List<Integer> cur = opskills.get(i);
+            total += predOppSkills.distanceFrom(opskills.get(i));
+        }
+
+        return total < 15;
     }
 }
