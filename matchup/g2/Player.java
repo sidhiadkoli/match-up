@@ -386,7 +386,6 @@ public class Player implements matchup.sim.Player {
 	
     }
 
-    // NINE 9s one 4 five 1s
     public List<Integer> getSkills() {
 	
 	// ###############################################
@@ -398,7 +397,7 @@ public class Player implements matchup.sim.Player {
 	//-> store the information in class members for other functions to use
 	List<Game> games = History.getHistory();
 	double numGamePairs = games.size();
-	//System.out.println(games.size());
+	System.out.println(games.size());
 	
 	PlayerData opponent;
 	List<Integer> oppSkills;
@@ -447,6 +446,7 @@ public class Player implements matchup.sim.Player {
 	
 	// popularSkills contains a single list of skills in order of decreasing frequency of use in the opponent's skill distribution
 	popularSkills = new LinkedHashMap<Integer, List<Integer>>();
+	List<Double> sortedVals = new ArrayList<Double>();
 	
 	
 	boolean notNull = false;
@@ -455,11 +455,11 @@ public class Player implements matchup.sim.Player {
 	    notNull = false;
 	    // Find out which player is the opponent
 	    if (g.playerA.name.equals("g2")) {
-		opponent = g.playerB;
-		oppSkills = g.playerB.skills; 
+			opponent = g.playerB;
+			oppSkills = g.playerB.skills; 
 	    } else {
-		opponent = g.playerA;
-		oppSkills = g.playerA.skills;
+			opponent = g.playerA;
+			oppSkills = g.playerA.skills;
 	    }
 	    
 	    if (!oppSkills.isEmpty()) {
@@ -534,72 +534,194 @@ public class Player implements matchup.sim.Player {
 	    
 	    // Create a list of skills in order of decreasing frequency of use in the opponents skill distribution
 	    // Each pair consists of a count and a list of all skills with that count (to catch the case in which there more than one skill is used the most)
-	    List<Long> sortedVals = new ArrayList(historySkillPercents.values());
+	    sortedVals = new ArrayList(historySkillCount.values());
 	    sortedVals.sort(null);
 	    Collections.reverse(sortedVals);
+	    System.out.println(sortedVals);
+
 	    List<Integer> usedVals = new ArrayList<Integer>();
-	    for (Long longVal : sortedVals) {
-		int val = longVal.intValue();
+	    for (Double doubleVal : sortedVals) {
+	    int val = doubleVal.intValue();
 		if (!usedVals.contains(val)) {
 		    List<Integer> sList = new ArrayList<Integer>();
-		    for (int s : historySkillPercents.keySet()) {
-			if (historySkillPercents.get(s).intValue() == val)
+		    for (int s : historySkillCount.keySet()) {
+			if (historySkillCount.get(s).intValue() == val)
 			    sList.add(s);
 		    }
 		    popularSkills.put(val, sList);
 		    usedVals.add(val);
 		}
 	    }
-	    //System.out.println("popularSkills: " + popularSkills); //
-			 
-	}
+	    System.out.println("popularSkills: " + popularSkills); //
+		
+	}			
+	System.out.println("!!!");
+
 	
 		// ##########################################################
 		// ### End collection of information about previous games ###
 		// ##########################################################
 	
-	maxSkill = 0;
+		if (games.size() > 1) {
+			System.out.println("not null");
 
-	int pickRandLine;
-	
-	if (maxSkill == 7) {
-	    pickRandLine = 0;
-	} else if (maxSkill == 9) {
-	    pickRandLine = 1;
-	} else {
-	    pickRandLine = rand.nextInt(2);
-	}
-	
-	
-	
-	skills = new ArrayList<Integer>();
-	
-	
-	if (pickRandLine == 1){
-	    skills.add(4); // adding one 4
-	    for (int i = 0 ; i < 9; i++){
-		
-		//adding nine 9s
-		skills.add(9);
+			int strategy = 2;
 
-		//adding five 1s
-		if(i%2 == 0){
-		    skills.add(1);
+		//*************
+		// STRATEGY # 1
+		//*************
+
+		if (strategy == 0){
+			skills = new ArrayList<Integer>();
+
+			maxSkill = 0;
+			int minSkill = 12;
+
+			double maxCount = 0;
+			double minCount = 0;
+			// iterate over most popular skills
+
+			//e.g.
+			//popularSkills: {6=[6], 4=[3, 4, 8, 9], 2=[2, 5, 7, 10], 0=[1, 11]}
+			System.out.println("Second game");
+			int maxIndex = sortedVals.get(0).intValue();
+			int secmaxIndex = sortedVals.get(1).intValue();
+			List<Integer> mostUsed = new ArrayList<Integer>(popularSkills.get(maxIndex));
+			System.out.println(mostUsed);
+			List<Integer> secMostUsed = new ArrayList<Integer>(popularSkills.get(secmaxIndex));
+			System.out.println(secMostUsed);
+
+
+
+		    for (int i =0; i < (maxIndex / games.size()/2) *15;i++){ 
+	
+		    	// if (mostUsed.get(i) > maxSkill){
+		    	// 	maxSkill = mostUsed.get(i);
+		    	// }
+		    	// if ((mostUsed.get(i) < minSkill) && ( mostUsed.get(i) < 8)){
+		    	// 	minSkill = mostUsed.get(i);
+		    	// }else
+		    	// {
+
+		    	// 	minSkill = 4;
+		    	// }
+		    	skills.add(mostUsed.get(0));
+
+
+		    }
+		    maxCount = (int)((double)historySkillCount.get(maxSkill));
+		    minCount = (int)((double)historySkillCount.get(minSkill));
+
+
+		    // for (int j = 0 ; j < (maxCount*15)/games.size()/2 && (j < 15);j++ ){
+
+		    // 	skills.add(maxSkill-2);
+		    // }
+		    // for (int j = 0 ; j < (minCount*15)/games.size()/2 && (j < 15);j++ ){
+
+		    // 	skills.add(minSkill+3);
+		    // }
+
+		    
+
+		    int sumSkills = 0 ;
+		    for (int s : skills){
+		    	sumSkills += s;
+		    }
+
+
+		    int numsLeft = 15 - skills.size();
+		    int skillsLeft = 90 - sumSkills;
+		    int nextMean = 7;
+
+		    for ( int k = 0 ; k < numsLeft-1; k++){
+
+
+		    	nextMean = numsLeft / skillsLeft ; 
+		    	int newSkill = rand.nextInt(3)*(-1)^k + nextMean;
+		    	skills.add(newSkill);
+
+		    	numsLeft--;
+		    	skillsLeft -= newSkill;
+
+		    }
+		    skills.add(skillsLeft);
+
+		    System.out.println(skills);
+
+
 		}
-	    }
+		//*************
+		// STRATEGY # 2
+		//*************
+		//Description:
+		// random set of skills from 5 probabalistically good lines
+		else if (strategy == 1){
+			int pickRandLine;
+			pickRandLine = rand.nextInt(5);
+
+			skills = new ArrayList<Integer>();
+
+			// GOOD RANDOM LINE = [ 1 1 1 1 1 4 9 9 9 9 9 9 9 9 9]
+			if (pickRandLine == 0){
+				skills = new ArrayList<Integer>(Arrays.asList(1,1,1,1,1,4,9,9,9,9,9,9,9,9,9));
+			}
+
+			// GOOD RANDOM LINE = [ 4 4 4 4 4 7 7 7 7 7 7 7 7 7 7]
+			else if (pickRandLine == 1){
+				skills = new ArrayList<Integer>(Arrays.asList(4,4,4,4,4,7,7,7,7,7,7,7,7,7,7));
+			}
+			else if (pickRandLine == 2){
+				skills = new ArrayList<Integer>(Arrays.asList(1,1,1,1,1,8,8,8,8,8,9,9,9,9,9));
+			}
+			else if (pickRandLine == 3){
+				skills = new ArrayList<Integer>(Arrays.asList(4,4,4,4,4,6,6,6,6,6,8,8,8,8,8));
+			}
+			else if (pickRandLine == 4){
+				skills = new ArrayList<Integer>(Arrays.asList(2,2,2,2,2,6,6,6,6,6,10,10,10,10,10));
+			}
+
+		}
+
+
+		//*************
+		// STRATEGY # 3
+		//*************
+		//Description:
+		// 2 below theyre highest 9 numbers 3 above lowest 6
+		else if (strategy == 2){
+
+			
+				Game lastGame =  games.get(games.size()-1);
+				List<Integer> oppLastSkills;
+				skills = new ArrayList<Integer>();
+
+				if (lastGame.playerA.name.equals("g2")){
+					oppLastSkills = new ArrayList<Integer>(lastGame.playerB.skills);
+					
+				}
+				else{
+					oppLastSkills = new ArrayList<Integer>(lastGame.playerA.skills);
+				}
+				for (int i = 0 ; i < 15; i++){
+					if (i<6){
+						skills.add(oppLastSkills.get(i) + 3);
+					}
+					else
+						skills.add(oppLastSkills.get(i) - 2);
+				}
+				// System.out.println(oppLastSkills);
+
+			
+			
+			
+
+		}
+	} else {
+		skills = new ArrayList<Integer>(Arrays.asList(1,1,1,1,1,4,9,9,9,9,9,9,9,9,9));
+
 	}
-	else {
-	    for (int i = 0 ; i < 10;i++){
-		
-		//adding nine 7s
-		skills.add(7);
-		
-		//adding five 4s
-		if(i%2 == 0)
-	                skills.add(4);
-	    }
-	}
-	return skills;
+		return skills;
     }
     
     public List<List<Integer>> getDistribution(List<Integer> opponentSkills, boolean isHome) {
