@@ -2,6 +2,7 @@ package matchup.g4;
 
 import java.util.Collections;
 import java.util.Collection;
+import java.util.List;
 
 public class Skills extends java.util.ArrayList<Integer> {
 
@@ -37,5 +38,20 @@ public class Skills extends java.util.ArrayList<Integer> {
 
     public void groupForAway() {
         groupHelper(0);
+    }
+
+    public double distanceFrom(List<Integer> other) {
+        Skills mine = new Skills(this);
+        Skills theirs = new Skills(other);
+        Collections.sort(mine);
+        Collections.sort(theirs);
+
+        int total = 0;
+        for (int i = 0; i < 15; ++i) {
+            int diff = theirs.get(i) - mine.get(i);
+            total += diff * diff;
+        }
+
+        return Math.sqrt((double)total);
     }
 }
