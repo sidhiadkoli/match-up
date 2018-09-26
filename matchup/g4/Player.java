@@ -53,12 +53,10 @@ public class Player implements matchup.sim.Player {
 
     public List<Integer> getSkills() {
         if (stats != null) {
-			stats.update();
-
-			if (stats.doCounter()) {
-				skills = stats.getCounter();
-			}
-            //System.out.println("wins:" + stats.totalWins);
+        	//System.out.println(skills == null);
+        	stats.update();
+        	//System.out.println(skills == null);
+            skills = stats.getSkills();   
 		}
         
 		return skills;
