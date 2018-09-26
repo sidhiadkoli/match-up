@@ -168,6 +168,9 @@ public class Player implements matchup.sim.Player {
 		swarm.update(200);
 		System.out.println(swarm.globalBest);
 		skills = Arrays.stream(swarm.normalizeGlobal()).boxed().collect(Collectors.toList());
+
+        // HARDCODED DISTRIBUTION
+        skills = new ArrayList<Integer>(Arrays.asList(1, 2, 2, 2, 3, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9));
 	}
 	
 
