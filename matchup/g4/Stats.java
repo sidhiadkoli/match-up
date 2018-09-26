@@ -1,3 +1,6 @@
+
+
+
 package matchup.g4;
 
 import java.util.ArrayList;
@@ -13,9 +16,18 @@ class Stats {
 	private List<Integer> predOppSkills;
 	private boolean isPlayerA;
 	private int lossStreak;
+
 	private boolean detectedTwoStep = false;
 	private boolean immediateCounter = false;
 	private boolean twoStepCounter = false;
+
+    public int totalTies = 0;
+    public int totalWins = 0;
+    public int totalLoss = 0;
+    public int currTies = 0;
+    public int currWins = 0;
+    public int currLoss = 0;
+
 	public Stats() {
 		games = History.getHistory();
 		isPlayerA = games.get(0).playerA.name.equals("g4");
@@ -83,13 +95,21 @@ class Stats {
 
         if (lastScore < 0) { //lost last game
             lossStreak ++;
-        } else {
+            totalLoss ++;
+            currLoss ++;
+        } else if (lastScore > 0){ //won
             lossStreak = 0; //reset
+            totalWins ++;
+            currWins ++;
+        } else { //tie
+            lossStreak = 0;
+            totalTies ++;
+            currTies ++;
         }
     }
 
     public boolean doCounter() {
-    	return lossStreak >= 3;
+    	return lossStreak >= 3 || (currLoss-2) > currWins;// || ((currTies - 10 > currWins) && totalWins < totalLoss) ;
     }
 
     public Skills getCounter() {
@@ -114,6 +134,9 @@ class Stats {
     	}
     	
     	lossStreak = 0; // reset, give new strategy a chance to win
+        currLoss = 0;
+        currWins = 0;
+        currTies = 0;
 
         List<List<Integer>> opskills = new ArrayList<List<Integer>>();
 
