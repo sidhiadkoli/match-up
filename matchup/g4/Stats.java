@@ -19,10 +19,6 @@ class Stats {
     private boolean doCounter;
     private int counterTimer;
 
-	// private boolean detectedTwoStep;
-	// private boolean immediateCounter;
-	// private boolean twoStepCounter;
-
     public int totalTies;
     public int totalWins;
     public int totalLoss;
@@ -32,10 +28,7 @@ class Stats {
 
 	public Stats() {
 		games = History.getHistory();
-		isPlayerA = games.get(0).playerA.name.equals("g4");
-        // detectedTwoStep = false;
-        // immediateCounter = false;
-        // twoStepCounter = false;      
+		isPlayerA = games.get(0).playerA.name.equals("g4");    
         doCounter = false; 
         counterTimer = 0;
 		lossStreak = 0;
@@ -57,8 +50,6 @@ class Stats {
 		games = History.getHistory();
         checkLoss();
 
-        //System.out.println("Hi");
-
         if (doCounter) {
             if (counterTimer == 0) {
                 curSkills = new Skills(counter(counter(curSkills)));
@@ -66,8 +57,6 @@ class Stats {
                 counterTimer--;
             }
         }
-
-        //System.out.println("Hi");
 
         if (lossStreak >= 3) {
             doCounter = false;
@@ -158,74 +147,12 @@ class Stats {
         }
     }
 
-    // public boolean doCounter() {
-    // 	return lossStreak >= 3 || (currLoss-2) > currWins;// || ((currTies - 10 > currWins) && totalWins < totalLoss) ;
-    // }
-
     private void reset() {
         lossStreak = 0; // reset, give new strategy a chance to win
         currLoss = 0;
         currWins = 0;
         currTies = 0;
     }
-
-   //  public Skills getCounter() {    	
-   //  	//checkCounterStrategy();
-   //  	if(immediateCounter){
-   //  		List<Integer> opskillsR0 = new ArrayList<Integer>();
-   //  		if(!isPlayerA) opskillsR0 = games.get(games.size()-1).playerA.skills;
-   //  		else opskillsR0 = games.get(games.size()-1).playerB.skills;
-   //  		return new Skills(counter(opskillsR0));
-   //  	}
-   //  	else if(twoStepCounter){
-   //  		List<Integer> ourSkillsR0 = new ArrayList<Integer>();
-   //  		if(!isPlayerA) ourSkillsR0 = games.get(games.size()-1).playerB.skills;
-			// else ourSkillsR0 = games.get(games.size()-1).playerA.skills;
-   //  		if (detectedTwoStep==true){
-	  //   		detectedTwoStep = !detectedTwoStep;
-   //  			return new Skills(counter(counter(ourSkillsR0)));
-   //  		}
-   //  		detectedTwoStep = !detectedTwoStep;
-   //  		return new Skills(ourSkillsR0);
-   //  	}
-    	
-   //  	lossStreak = 0; // reset, give new strategy a chance to win
-   //      currLoss = 0;
-   //      currWins = 0;
-   //      currTies = 0;
-
-   //      opskills = new ArrayList<List<Integer>>();
-
-   //  	if (isPlayerA) {
-   //  		for (int i = 5; i > 0; i -= 2) {
-   //  			opskills.add(games.get(games.size()-i).playerB.skills);
-   //  		}
-   //  	} else {
-   //  		for (int i = 5; i > 0; i -= 2) {
-   //  			opskills.add(games.get(games.size()-i).playerA.skills);
-   //  		}
-   //  	}
-        
-   //      predOppSkills = new Skills();
-
-   //      for (int i=0;i<15;i++) {
-   //          List<Integer> temp = new ArrayList<Integer>();
-   //          for (int j = 0; j < 3; j++) {
-   //          	temp.add(opskills.get(j).get(i));
-   //          }
-
-   //          predOppSkills.add(maxmode(temp));
-   //      }
-
-   //      //for (int i = 0; i < 3; i++) {
-   //      //    List<Integer> cur = opskills.get(i);
-   //      //	System.out.println(cur + " : " + predOppSkills.distanceFrom(cur));
-   //      //}
-   //      System.out.println("predicted:");
-   //      System.out.println(predOppSkills);
-
-   //      return new Skills(counter(predOppSkills));
-   //  }
 
     private int maxmode(List<Integer> arr) {
         int maxCount = 0;

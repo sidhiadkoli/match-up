@@ -53,9 +53,7 @@ public class Player implements matchup.sim.Player {
 
     public List<Integer> getSkills() {
         if (stats != null) {
-        	//System.out.println(skills == null);
         	stats.update();
-        	//System.out.println(skills == null);
             skills = stats.getSkills();   
 		}
         
