@@ -28,6 +28,14 @@ public class Player implements matchup.sim.Player {
     private int seed = 64;
     private Random rand;
 
+    private int totalTies = 0;
+    private int totalWins = 0;
+    private int totalLoss = 0;
+    private int currTies = 0;
+    private int currWins = 0;
+    private int currLoss = 0;
+
+
     public Player() {
     	rand = new Random(seed);
         Integer s[] = {9,9,9,9,9,9,9,9,9,4,1,1,1,1,1};
@@ -50,8 +58,9 @@ public class Player implements matchup.sim.Player {
 			if (stats.doCounter()) {
 				skills = stats.getCounter();
 			}
+            //System.out.println("wins:" + stats.totalWins);
 		}
-
+        
 		return skills;
     }
 
