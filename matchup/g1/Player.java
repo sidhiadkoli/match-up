@@ -11,6 +11,7 @@ public class Player implements matchup.sim.Player {
     private List<Integer> bestTeam;
     private List<Integer> opponentTeam;
     private List<List<Integer>> distribution;
+    private List<Integer> varianceSkills;
     private boolean globalIsHome;
 
     private List<Integer> availableRows;
@@ -43,8 +44,7 @@ public class Player implements matchup.sim.Player {
 			List<Integer> opponentPastSkills = buildFromHistory();	//approximates opponent distribution from history
 			List<Integer> adaptedPlayersSkills = buildOptimalPlayers(opponentPastSkills);	//generates our lineup of 15 players
 			
-    		skills = getLowVarianceLineup(adaptedPlayersSkills);	//returns low variance skills
-    		//skills = getMixedVarianceLineup(adaptedPlayersSkills); //returns mixed variance skills
+			skills = getMixedVarianceLineup(adaptedPlayersSkills); //returns mixed variance skills
 		}
 
 	    return skills;
@@ -143,7 +143,22 @@ public class Player implements matchup.sim.Player {
     	
     	return fskills;
     }
-    
+
+    //generate lineup with high variance
+    public List<Integer> getHighVarianceLineup(List<Integer> fskills)
+    {
+	Collections.sort(fskills);
+	Collections.swap(fskills, 3, 1);
+	Collections.swap(fskills, 6, 2);
+	Collections.swap(fskills, 9, 3);
+	Collections.swap(fskills, 12, 4);
+	Collections.swap(fskills, 9, 5);
+	Collections.swap(fskills, 12, 6);
+	Collections.swap(fskills, 10, 8);
+	Collections.swap(fskills, 13, 9);
+	return fskills;
+    }
+
     //generate lineup with mixed variance
     public List<Integer> getMixedVarianceLineup(List<Integer> fskills)
     {
@@ -160,12 +175,20 @@ public class Player implements matchup.sim.Player {
     	for (int i=0; i<15; ++i) index.add(i);
 
     	distribution = new ArrayList<List<Integer>>();
+    	varianceSkills = new ArrayList<Integer>();
+	if (globalIsHome) {
+	    System.out.println("is globalIsHome");
+	    varianceSkills = getHighVarianceLineup(skills); //returns mixed variance skills
+	} else {
+	    System.out.println("not globalIsHome");
+	    varianceSkills = getLowVarianceLineup(skills); //returns mixed variance skills
+	}
 
 		int n = 0;
     	for (int i=0; i<3; ++i) {
     		List<Integer> row = new ArrayList<Integer>();
     		for (int j=0; j<5; ++j) {
-    			row.add(skills.get(index.get(n)));
+    			row.add(varianceSkills.get(index.get(n)));
     			++n;
     		}
 
@@ -210,6 +233,7 @@ public class Player implements matchup.sim.Player {
     public List<Integer> playRound(List<Integer> opponentRound) {
 
 		if (!globalIsHome) {
+
             int n = rand.nextInt(availableRows.size());
             List<Integer> round = new ArrayList<Integer>(distribution.get(availableRows.get(n)));
             availableRows.remove(n);
