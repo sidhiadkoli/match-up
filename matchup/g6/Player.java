@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.*;
+
 import javafx.util.Pair;
 import matchup.sim.utils.*;
 
@@ -67,7 +68,11 @@ public class Player implements matchup.sim.Player {
             // get opponent past skill distribution
             // System.out.print(games.get(sz - 1).playerB.name + ": ");
             // System.out.println(games.get(sz - 1).playerB.skills);
-            opponentPastSkills = games.get(sz - 1).playerB.skills;
+            if (games.get(sz - 1).playerB.name != "g6") {
+                opponentPastSkills = games.get(sz - 1).playerB.skills;
+            } else {
+                opponentPastSkills = games.get(sz - 1).playerA.skills;
+            }
             Collections.sort(opponentPastSkills);
             opponentPastSkills.get(0);
             range = opponentPastSkills.get(14) - opponentPastSkills.get(0);
@@ -109,12 +114,11 @@ public class Player implements matchup.sim.Player {
             }
         }
 
-        int verifySum = 0;
         /*** James new learning version skills generator ***/
         //getFrequencyDensity();
-        if (History.getHistory()!=null && History.getHistory().size() > 3 ) {
+        if (History.getHistory() != null && History.getHistory().size() > 3) {
             skills.clear();
-            List<Integer> counterStrats = Arrays.asList(4, 5, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+            List<Integer> counterStrats = Arrays.asList(4, 5, 6, 2, 3, 4, 5, 6, 7, 8, 9);
             List<Double> density = getFrequencyDensity();
             skills = new ArrayList<>(Collections.nCopies(15, 1));
             int remainingSkill = 75;
@@ -127,38 +131,37 @@ public class Player implements matchup.sim.Player {
             Collections.sort(myFreqEst, Comparator.comparingInt(Pair::getValue));
             int skillIndex = 0;
             int densityIndex = 0;
-            while (remainingSkill > 0 && skillIndex < 11) {
-                Pair<Integer, Integer> p = myFreqEst.get(densityIndex);
-                for (int j = 0; j < p.getValue(); j++) {
-                    if (counterStrats.get(p.getKey()-1) > skills.get(skillIndex)) {
-                        remainingSkill -= counterStrats.get(p.getKey()-1) - skills.get(skillIndex);
-                        skills.set(skillIndex++, counterStrats.get(p.getKey()-1));
+            try {
+                while (remainingSkill > 0 && skillIndex < 15) {
+                    Pair<Integer, Integer> p = myFreqEst.get(densityIndex);
+                    for (int j = 0; j < p.getValue(); j++) {
+                        if (counterStrats.get(p.getKey() - 1) > skills.get(skillIndex)) {
+                            remainingSkill -= counterStrats.get(p.getKey() - 1) - skills.get(skillIndex);
+                            if (remainingSkill < 0) break;
+                            skills.set(skillIndex++, counterStrats.get(p.getKey() - 1));
+                            if(skillIndex>=15)break;
+                        }
                     }
+                    densityIndex++;
                 }
-                densityIndex++;
+            } catch (Exception e) {
+
             }
-            skillIndex=14;
-            while(remainingSkill > 0){
-                if(skills.get(skillIndex)+1<12) {
+            skillIndex = 14;
+            while (remainingSkill > 0) {
+                if (skills.get(skillIndex) + 1 < 12) {
                     remainingSkill--;
                     skills.set(skillIndex--, skills.get(skillIndex + 1) + 1);
-                }
-                else skillIndex--;
-                if(skillIndex<8)skillIndex=14;
+                } else skillIndex--;
+                if (skillIndex < 5) skillIndex = 14;
             }
-            skillIndex=14;
-            while(remainingSkill > 0){
-                if(skills.get(skillIndex)+1<12) {
+            skillIndex = 14;
+            while (remainingSkill > 0) {
+                if (skills.get(skillIndex) + 1 < 12) {
                     remainingSkill--;
                     skills.set(skillIndex--, skills.get(skillIndex + 1) + 1);
-                }
-                else skillIndex--;
-                if(skillIndex<0)skillIndex=14;
-            }
-
-
-            for(int x: skills){
-                verifySum+=x;
+                } else skillIndex--;
+                if (skillIndex < 0) skillIndex = 14;
             }
 
         }
@@ -177,7 +180,7 @@ public class Player implements matchup.sim.Player {
         List<Integer> skill_copy = new ArrayList<Integer>(skills);
         Collections.sort(skill_copy, Collections.reverseOrder());
 
-        distribution = new ArrayList<List<Integer>>();
+        distribution = new ArrayList<>();
 
         // int n = 0;
         // for (int i = 0; i < 3; ++i) {
@@ -397,11 +400,10 @@ public class Player implements matchup.sim.Player {
         for (Game g : History.getHistory()) {
             List<Integer> tmp = new ArrayList<>();
             PlayerData opponent;
-            if(g.playerA.name.compareTo("g6") == 0){
-                opponent=g.playerB;
-            }
-            else {
-                opponent=g.playerA;
+            if (g.playerA.name.compareTo("g6") == 0) {
+                opponent = g.playerB;
+            } else {
+                opponent = g.playerA;
             }
             for (int x : opponent.skills) {
                 tmp.add(x);
