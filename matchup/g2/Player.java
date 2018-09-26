@@ -397,7 +397,7 @@ public class Player implements matchup.sim.Player {
 	//-> store the information in class members for other functions to use
 	List<Game> games = History.getHistory();
 	double numGamePairs = games.size();
-	System.out.println(games.size());
+	//System.out.println(games.size());
 	
 	PlayerData opponent;
 	List<Integer> oppSkills;
@@ -474,13 +474,13 @@ public class Player implements matchup.sim.Player {
 		    count_current += oppSkillCount.get(s);
 		    historySkillCount.replace(s, count_current);
 		}
-		//System.out.println("historySkillCount: " + historySkillCount); //
+		////System.out.println("historySkillCount: " + historySkillCount); //
 		
 		// Add the statistics of the overall skill distribution for this round to historySkillStats
 		for (String stat : historySkillStats.keySet()) {
 		    historySkillStats.get(stat).add(oppSkillStats.get(stat));
 		}
-		//System.out.println("historySkillStats: " + historySkillStats); //
+		////System.out.println("historySkillStats: " + historySkillStats); //
 		
 		// For each line, add the statistics of the line skill distribution for this round to historyLineStats
 		for (int i=0; i<3; i++) {
@@ -490,7 +490,7 @@ public class Player implements matchup.sim.Player {
 			historyLineStats.get(stat).get(i).add(lineStats.get(stat));
 		    }
 		}
-		//System.out.println("historyLineStats: " + historyLineStats); //
+		////System.out.println("historyLineStats: " + historyLineStats); //
 	    }
 	    
 	}
@@ -500,15 +500,15 @@ public class Player implements matchup.sim.Player {
 	
 	if (notNull) {
 	    
-	    //System.out.println("historySkillCount: " + historySkillCount); //
+	    ////System.out.println("historySkillCount: " + historySkillCount); //
 	    
 	    // Get percentages for the skill counts in the overall skill distribution
 	    for (int s : historySkillCount.keySet()) {
-		//System.out.println(historySkillCount.get(s));
+		////System.out.println(historySkillCount.get(s));
 		double percent = (historySkillCount.get(s)/(numGamePairs*15.0))*100.0;
 		historySkillPercents.put(s, Math.round(percent));
 	    }
-	    //System.out.println("historySkillPercents: " + historySkillPercents); //
+	    ////System.out.println("historySkillPercents: " + historySkillPercents); //
 	    
 	    // Get averages for the overall skill distribution statistics		
 	    for (String stat : historySkillStats.keySet()) {
@@ -518,7 +518,7 @@ public class Player implements matchup.sim.Player {
 		}
 		aveSkillHistory.replace(stat, total/historySkillStats.get(stat).size());
 	    }
-	    //System.out.println("aveSkillHistory: " + aveSkillHistory); //
+	    ////System.out.println("aveSkillHistory: " + aveSkillHistory); //
 	    
 	    // Get averages for the line statistics
 	    for (String stat : historyLineStats.keySet()) {
@@ -530,14 +530,14 @@ public class Player implements matchup.sim.Player {
 		    aveLineHistory.get(stat).put(i, total/historyLineStats.get(stat).get(i).size());
 		}
 	    }
-	    //System.out.println("aveLineHistory: " + aveLineHistory); //
+	    ////System.out.println("aveLineHistory: " + aveLineHistory); //
 	    
 	    // Create a list of skills in order of decreasing frequency of use in the opponents skill distribution
 	    // Each pair consists of a count and a list of all skills with that count (to catch the case in which there more than one skill is used the most)
 	    sortedVals = new ArrayList(historySkillCount.values());
 	    sortedVals.sort(null);
 	    Collections.reverse(sortedVals);
-	    System.out.println(sortedVals);
+	    //System.out.println(sortedVals);
 
 	    List<Integer> usedVals = new ArrayList<Integer>();
 	    for (Double doubleVal : sortedVals) {
@@ -552,10 +552,10 @@ public class Player implements matchup.sim.Player {
 		    usedVals.add(val);
 		}
 	    }
-	    System.out.println("popularSkills: " + popularSkills); //
+	    ////System.out.println("popularSkills: " + popularSkills); //
 		
 	}			
-	System.out.println("!!!");
+	//System.out.println("!!!");
 
 	
 		// ##########################################################
@@ -563,100 +563,20 @@ public class Player implements matchup.sim.Player {
 		// ##########################################################
 	
 		if (games.size() > 1) {
-			System.out.println("not null");
+			////System.out.println("not null");
 
-			int strategy = 2;
+			int strategy = rand.nextInt(2);
+			// int strategy = 1;
 
+
+
+			
 		//*************
 		// STRATEGY # 1
 		//*************
-
-		if (strategy == 0){
-			skills = new ArrayList<Integer>();
-
-			maxSkill = 0;
-			int minSkill = 12;
-
-			double maxCount = 0;
-			double minCount = 0;
-			// iterate over most popular skills
-
-			//e.g.
-			//popularSkills: {6=[6], 4=[3, 4, 8, 9], 2=[2, 5, 7, 10], 0=[1, 11]}
-			System.out.println("Second game");
-			int maxIndex = sortedVals.get(0).intValue();
-			int secmaxIndex = sortedVals.get(1).intValue();
-			List<Integer> mostUsed = new ArrayList<Integer>(popularSkills.get(maxIndex));
-			System.out.println(mostUsed);
-			List<Integer> secMostUsed = new ArrayList<Integer>(popularSkills.get(secmaxIndex));
-			System.out.println(secMostUsed);
-
-
-
-		    for (int i =0; i < (maxIndex / games.size()/2) *15;i++){ 
-	
-		    	// if (mostUsed.get(i) > maxSkill){
-		    	// 	maxSkill = mostUsed.get(i);
-		    	// }
-		    	// if ((mostUsed.get(i) < minSkill) && ( mostUsed.get(i) < 8)){
-		    	// 	minSkill = mostUsed.get(i);
-		    	// }else
-		    	// {
-
-		    	// 	minSkill = 4;
-		    	// }
-		    	skills.add(mostUsed.get(0));
-
-
-		    }
-		    maxCount = (int)((double)historySkillCount.get(maxSkill));
-		    minCount = (int)((double)historySkillCount.get(minSkill));
-
-
-		    // for (int j = 0 ; j < (maxCount*15)/games.size()/2 && (j < 15);j++ ){
-
-		    // 	skills.add(maxSkill-2);
-		    // }
-		    // for (int j = 0 ; j < (minCount*15)/games.size()/2 && (j < 15);j++ ){
-
-		    // 	skills.add(minSkill+3);
-		    // }
-
-		    
-
-		    int sumSkills = 0 ;
-		    for (int s : skills){
-		    	sumSkills += s;
-		    }
-
-
-		    int numsLeft = 15 - skills.size();
-		    int skillsLeft = 90 - sumSkills;
-		    int nextMean = 7;
-
-		    for ( int k = 0 ; k < numsLeft-1; k++){
-
-
-		    	nextMean = numsLeft / skillsLeft ; 
-		    	int newSkill = rand.nextInt(3)*(-1)^k + nextMean;
-		    	skills.add(newSkill);
-
-		    	numsLeft--;
-		    	skillsLeft -= newSkill;
-
-		    }
-		    skills.add(skillsLeft);
-
-		    System.out.println(skills);
-
-
-		}
-		//*************
-		// STRATEGY # 2
-		//*************
 		//Description:
 		// random set of skills from 5 probabalistically good lines
-		else if (strategy == 1){
+		if (strategy == 0){
 			int pickRandLine;
 			pickRandLine = rand.nextInt(5);
 
@@ -674,10 +594,10 @@ public class Player implements matchup.sim.Player {
 			else if (pickRandLine == 2){
 				skills = new ArrayList<Integer>(Arrays.asList(1,1,1,1,1,8,8,8,8,8,9,9,9,9,9));
 			}
-			else if (pickRandLine == 3){
+			else if (pickRandLine == 4){
 				skills = new ArrayList<Integer>(Arrays.asList(4,4,4,4,4,6,6,6,6,6,8,8,8,8,8));
 			}
-			else if (pickRandLine == 4){
+			else if (pickRandLine == 3){
 				skills = new ArrayList<Integer>(Arrays.asList(2,2,2,2,2,6,6,6,6,6,10,10,10,10,10));
 			}
 
@@ -685,11 +605,11 @@ public class Player implements matchup.sim.Player {
 
 
 		//*************
-		// STRATEGY # 3
+		// STRATEGY # 2
 		//*************
 		//Description:
 		// 2 below theyre highest 9 numbers 3 above lowest 6
-		else if (strategy == 2){
+		else if (strategy == 1){
 
 			
 				Game lastGame =  games.get(games.size()-1);
@@ -710,7 +630,7 @@ public class Player implements matchup.sim.Player {
 					else
 						skills.add(oppLastSkills.get(i) - 2);
 				}
-				// System.out.println(oppLastSkills);
+				// //System.out.println(oppLastSkills);
 
 			
 			
@@ -763,7 +683,7 @@ public class Player implements matchup.sim.Player {
 			int strategy;
 
 			strategy = rand.nextInt(3);
-			System.out.println(strategy);
+			////System.out.println(strategy);
 
 			if (strategy == 0) {
 				// pick strategy 0
@@ -939,7 +859,7 @@ public class Player implements matchup.sim.Player {
 			int strategy;
 
 			strategy = rand.nextInt(2);
-			System.out.println(strategy);
+			////System.out.println(strategy);
 
 			if (strategy == 0) {
 				// pick strategy 0
@@ -990,7 +910,7 @@ public class Player implements matchup.sim.Player {
 		} else {
 		    n = selectHomeLine(opponentRound);
 		}
-		//	System.out.println("selected line: " + n);
+		//	//System.out.println("selected line: " + n);
 		availableRows.remove(n);
 		
 		List<Integer> round = distribution.get(n);
@@ -1023,7 +943,7 @@ public class Player implements matchup.sim.Player {
 	    lineSkill.set(i, badHome.score(distribution.get(i)));
 	}
 	
-	int maxScore = 0;
+	int maxScore = -1000;
 	    for( int score : lineSkill ){
 		if (score > maxScore){
 		    maxScore = score;
@@ -1045,10 +965,10 @@ public class Player implements matchup.sim.Player {
 	    int chooseSecond = totalLineWins(distribution.get(availableRows.get(0)), opponentNextRound) + totalLineWins(distribution.get(availableRows.get(1)), opponentRound);
 
 	    if(chooseFirst > chooseSecond){
-		//System.out.println(chooseFirst + "wins with first");
+		////System.out.println(chooseFirst + "wins with first");
 		return availableRows.get(0);
 	    } else {
-		//System.out.println(chooseSecond + "wins with second");
+		////System.out.println(chooseSecond + "wins with second");
 		return availableRows.get(1);
 		}
 	} else { //selecting first home line
@@ -1056,7 +976,7 @@ public class Player implements matchup.sim.Player {
 	    List<Integer> opponentRemaining = opponentLineup.valueList();
 	    List<Integer> lineScore = Arrays.asList(0, 0, 0);
 	    
-	    //System.out.println("Opponents remaining: " + opponentRemaining);
+	    ////System.out.println("Opponents remaining: " + opponentRemaining);
 	    
 	    for (Integer i : availableRows) { // 0-2
 		Line temp = new Line(skills, true);
@@ -1067,7 +987,7 @@ public class Player implements matchup.sim.Player {
 		
 		lineScore.set(i, temp.score()-5*totalLineWins(distribution.get(i), opponentRound));
 	    }
-	    //System.out.println("linescores: " + lineScore);
+	    ////System.out.println("linescores: " + lineScore);
 	    
 	    int minScore = 1000;
 	    for(int i: lineScore){
@@ -1100,27 +1020,27 @@ public class Player implements matchup.sim.Player {
 	
 	if(j == line.size() -1){
 	    counter++; 
-	    //System.out.println(counter + java.util.Arrays.toString(line.toArray())); 
+	    ////System.out.println(counter + java.util.Arrays.toString(line.toArray())); 
 	    int temp = compareLine(line, opponentLine); 
 	    
 	    if(temp > score){ 
 		score = temp; 
-		//System.out.println("I just set the score: " + score); 
+		////System.out.println("I just set the score: " + score); 
 		bestLine.clear(); 
 		bestLine.addAll(line); 
-		//System.out.println("I just set best line: " + bestLine); 
+		////System.out.println("I just set best line: " + bestLine); 
 	    }
 	}
     }
     
-    //System.out.println("This is the best line end of permute: " + bestLine); 
+    ////System.out.println("This is the best line end of permute: " + bestLine); 
     
     
     //figure out which of two lines win 
     public int compareLine(List<Integer> home, List<Integer> away){
 	int homeScore = 0; 
 	
-	//System.out.println("I'm in compare line!"); 
+	////System.out.println("I'm in compare line!"); 
 	for(int i=0; i<5; i++){ 
 	    if(home.get(i) - away.get(i) >= 3){
 		homeScore ++; 
