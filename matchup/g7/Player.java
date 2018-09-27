@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.HashMap;
 
-import javafx.util.Pair;
 import matchup.g7.PSO.FitnessEvaluation;
 import matchup.g7.PSO.Swarm;
 
@@ -248,7 +247,7 @@ public class Player implements matchup.sim.Player {
 	 * @param opponentRound The list of player skills in the opponent line
 	 * @return a pair containing score difference and the optimal permutation
 	 */
-	private Pair<Integer, List<Integer>> permutation(int row, List<Integer> opponentRound) {
+	private Pair permutation(int row, List<Integer> opponentRound) {
 		ArrayList<ArrayList<Integer>> all_possible = new ArrayList<ArrayList<Integer>>();
  		all_possible.add(new ArrayList<Integer>());
  		List<Integer> line = distribution.get(row);
@@ -278,7 +277,7 @@ public class Player implements matchup.sim.Player {
 			}
 		}
 		//System.out.println(best_score);
-		return new Pair<Integer, List<Integer>>(best_score, best_lineup); 
+		return new Pair(best_score, best_lineup); 
 	}
 
 	private int ComputeScore(List<Integer> line1, List<Integer> line2){
@@ -294,6 +293,22 @@ public class Player implements matchup.sim.Player {
 		return score;
 	}
 	
+	private class Pair {
+		int key;
+		List<Integer> value;
+		Pair(int key, List<Integer> value){
+			this.key = key;
+			this.value = value;
+		}
+		
+		int getKey() {
+			return key;
+		}
+		
+		List<Integer> getValue(){
+			return value;
+		}
+	}
 	private class PlayRow {
 		private List<List<Integer>> opponentRemainDist;
 		private int maxScore = -16;
@@ -324,7 +339,7 @@ public class Player implements matchup.sim.Player {
 	        } 
 	    }
 		
-		protected Pair<Integer, List<Integer>> useRows(List<Integer> opponentRound){
+		protected Pair useRows(List<Integer> opponentRound){
 			// Predict opponent's line distributions
     		Collections.sort(opponentRemainSkills);
 			opponentRemainDist = new ArrayList<List<Integer>>();
@@ -339,7 +354,7 @@ public class Player implements matchup.sim.Player {
 			permuteRow(availableRows, 0, 0);
 			
 			//System.out.println(best_score);
-			return new Pair<Integer, List<Integer>>(bestLine, 
+			return new Pair(bestLine, 
 					permutation(bestLine, opponentRound).getValue());
 		}
 	}
@@ -355,9 +370,9 @@ public class Player implements matchup.sim.Player {
     		for (Integer i : opponentRound) {
     			opponentRemainSkills.remove(i);
     		}
-    		Pair<Integer, List<Integer>> temp = new PlayRow().useRows(opponentRound);
+    		Pair temp = new PlayRow().useRows(opponentRound);
     		round = temp.getValue();
-    		availableRows.remove(temp.getKey());
+    		availableRows.remove((Integer)temp.getKey());
     	}
     	else{
 	    	round =	distribution.get(availableRows.get(0));
