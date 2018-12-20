@@ -122,8 +122,8 @@ public class Player implements matchup.sim.Player {
 			else if(Opponent_score == Self_score)
 			{
 				tie++;
-				System.out.println("last game was a tie thus keeping previous team");
-				System.out.println(Integer.toString(tie));
+				//System.out.println("last game was a tie thus keeping previous team");
+				//System.out.println(Integer.toString(tie));
 				if(tie>=3) 
 				{
 					WonLast = false;
@@ -363,14 +363,14 @@ public class Player implements matchup.sim.Player {
 
 	List<Integer> round = null;
 	if (opponentRound==null) {
-//	System.out.println("mid row is" + Integer.toString(mid_row));
+//	//System.out.println("mid row is" + Integer.toString(mid_row));
     	round = distribution.get(0);
     	availableRows.remove(0);
     	return round;
 
 	}
 
-//	System.out.println("rational playing home strategy");
+//	//System.out.println("rational playing home strategy");
 	int n = availableRows.size();
         int[] score = new int[n];
 	int[] sum = new int[n];
@@ -417,8 +417,8 @@ public class Player implements matchup.sim.Player {
 
 	}
 
-//		System.out.println("Candidates populated");
-//		System.out.println(Candidates);	
+//		//System.out.println("Candidates populated");
+//		//System.out.println(Candidates);	
 
 /// decide which row to play
 
@@ -445,31 +445,31 @@ public class Player implements matchup.sim.Player {
 		}
 	}
 
-//	for(int i=0;i<n;i++) System.out.println("scores are " + Integer.toString(score[i]));
+//	for(int i=0;i<n;i++) //System.out.println("scores are " + Integer.toString(score[i]));
 	
 	int fin_choice = -1;
 
 	if(win_choice >= 0)
 		{
-//			System.out.println("winning this matchup");
+//			//System.out.println("winning this matchup");
 			fin_choice = win_choice;
 			availableRows.remove(win_choice);
 		}
 	else if(tie_choice >= 0)
 		{
-//			System.out.println("tying this matchup");
+//			//System.out.println("tying this matchup");
 			fin_choice = tie_choice;
 			availableRows.remove(tie_choice);
 		}
 	else
 		{
-//			System.out.println("losing this matchup");
+//			//System.out.println("losing this matchup");
 			fin_choice = loss_choice;
-			System.out.println(fin_choice);
+			//System.out.println(fin_choice);
 			availableRows.remove(loss_choice);
 		}
 
-//	System.out.println("Determine final choice");
+//	//System.out.println("Determine final choice");
         List<Integer> PlayedRow = new ArrayList<Integer>(Candidates.get(fin_choice));
 	
     	return PlayedRow;

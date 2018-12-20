@@ -17,7 +17,7 @@ public class Player implements matchup.sim.Player {
     private List<Integer> availableRows;
 
     // Random seed of 42.
-    private int seed = 42;
+    private int seed = 343;
     private Random rand;
 
     public Player() {
@@ -28,7 +28,7 @@ public class Player implements matchup.sim.Player {
 
         for (int i=0; i<3; ++i) availableRows.add(i);
     }
-    
+
     public void init(String opponent) {
     }
 
@@ -67,41 +67,24 @@ public class Player implements matchup.sim.Player {
 
         return distribution;
     }
-    
+
     public List<Integer> playRound(List<Integer> opponentRound) {
-	if (opponentRound == null) {
-	    opponentRound = new ArrayList<Integer>();
-	    Collections.addAll(opponentRound, 1, 2, 6, 10, 11);
-	}
-	//System.out.println("inside playRound");
-    	//System.out.println("oppTeam:");
-	//System.out.println(opponentRound);
-	//System.out.println("bestTeam:");
-	//System.out.println(bestTeam);
-	int n = rand.nextInt(availableRows.size());
+        if (opponentRound == null) {
+            opponentRound = new ArrayList<Integer>();
+            Collections.addAll(opponentRound, 1, 2, 6, 10, 11);
+        }
+        int n = rand.nextInt(availableRows.size());
 
-    	List<Integer> round = new ArrayList<Integer>(distribution.get(availableRows.get(n)));
-    	availableRows.remove(n);
+            List<Integer> round = new ArrayList<Integer>(distribution.get(availableRows.get(n)));
+            availableRows.remove(n);
 
-	bestTeam = new ArrayList<Integer>();
-	for (int i : round) {
-	    Collections.addAll(bestTeam, i);
-	}
-	//Collections.addAll(bestTeam, 0, 0, 0, 0, 0);
-	//System.out.println("bestTeam before permute:");
-	//System.out.println(bestTeam);
+        bestTeam = new ArrayList<Integer>();
+        for (int i : round) {
+            Collections.addAll(bestTeam, i);
+        }
 
-	round = permuteHomeTeam(round, opponentRound);
-	//System.out.println("oppTeam:");
-	//System.out.println(opponentRound);
-	System.out.println("bestTeam:");
-	System.out.println(bestTeam);
-	System.out.println("round:");
-	System.out.println(round);
-	return bestTeam;
-	//round = bestTeam;
-
-    	//return round;
+        round = permuteHomeTeam(round, opponentRound);
+        return bestTeam;
     }
 
 
@@ -110,29 +93,14 @@ public class Player implements matchup.sim.Player {
         for (int i=0; i<3; ++i) availableRows.add(i);
 
         // Get history of games.
-        // List<Game> games = History.getHistory();
-        // System.out.println(games.size());
     }
 
      public List<Integer> permuteHomeTeam(List<Integer> homeTeam, List<Integer> awayTeam){
-       	//System.out.println("homeTeam:");
-	//System.out.println(homeTeam);
-       	//System.out.println("awayTeam:");
-	//System.out.println(awayTeam);
-	//System.out.println("bestTeam:");
-	//System.out.println(bestTeam);
         if(checkLineupScore(homeTeam, awayTeam) == 5){
             return bestTeam;
         }
-       	//System.out.println("homeTeam:");
-	//System.out.println(homeTeam);
-       	//System.out.println("awayTeam:");
-	//System.out.println(awayTeam);
-	//System.out.println("bestTeam:");
-	//System.out.println(bestTeam);
-	permute(homeTeam, awayTeam);
+        permute(homeTeam, awayTeam);
 
-        //System.out.println(checkLineupScore(homeTeam, awayTeam));
         return bestTeam;
     }
 
@@ -141,7 +109,7 @@ public class Player implements matchup.sim.Player {
     }
 
     public void permuteHelper(List<Integer> arr, int index, List<Integer> away){
-	//get rid of temp?
+        //get rid of temp?
         if(index >= arr.size() - 1){
             int temp = 5;
         }
@@ -159,7 +127,7 @@ public class Player implements matchup.sim.Player {
     }
 
     public static int checkLineupScore(List<Integer> homeTeam, List<Integer> awayTeam){
-	// optimize later
+        // optimize later
         int score = 0;
         for(int i = 0; i < homeTeam.size(); i++){
             if(homeTeam.get(i) > awayTeam.get(i) + 2){
@@ -168,5 +136,4 @@ public class Player implements matchup.sim.Player {
         }
         return score;
     }
-
 }

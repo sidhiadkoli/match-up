@@ -15,7 +15,7 @@ public class Player implements matchup.sim.Player {
     private List<Integer> availableRows;
 
     // Random seed of 42.
-    private int seed = 42;
+    private int seed = 99;
     private Random rand;
 
     public Player() {
@@ -83,6 +83,6 @@ public class Player implements matchup.sim.Player {
 
         // Get history of games.
         // List<Game> games = History.getHistory();
-        // System.out.println(games.size());
+        // //System.out.println(games.size());
     }
 }

@@ -37,7 +37,7 @@ public class Player implements matchup.sim.Player {
         // for (int i = 0; i < 15; i++) {
         //     Random generator = new Random();
         //     double num = generator.nextGaussian();
-        //     System.out.println("gaus: "+num);
+        //     //System.out.println("gaus: "+num);
         //     int mean = 6;
         //     int stdDev = 3;
         //     double x = stdDev * num + mean;
@@ -53,7 +53,7 @@ public class Player implements matchup.sim.Player {
         //     int skillpt = (int) Math.round(x);
 
         //     leftover = leftover - skillpt;
-        //     System.out.println("leftover: "+leftover);
+        //     //System.out.println("leftover: "+leftover);
 
         //     skills.add(skillpt);
         // }
@@ -67,7 +67,7 @@ public class Player implements matchup.sim.Player {
         if (sz > 1) {
             // get opponent past skill distribution
             // System.out.print(games.get(sz - 1).playerB.name + ": ");
-            // System.out.println(games.get(sz - 1).playerB.skills);
+            // //System.out.println(games.get(sz - 1).playerB.skills);
             if (games.get(sz - 1).playerB.name != "g6") {
                 opponentPastSkills = games.get(sz - 1).playerB.skills;
             } else {
@@ -172,7 +172,7 @@ public class Player implements matchup.sim.Player {
     public List<List<Integer>> getDistribution(List<Integer> opponentSkills, boolean isHome) {
 
         //get density list
-        //System.out.println("Density dist");
+        ////System.out.println("Density dist");
         //printListDouble(getFrequencyDensity());
 
         List<Integer> index = new ArrayList<Integer>();
@@ -247,7 +247,7 @@ public class Player implements matchup.sim.Player {
                 tempSkills += round.get(j);
                 tempSkills -= opponentRound.get(j);
             }
-            //System.out.println(tempScore/tempSkills);
+            ////System.out.println(tempScore/tempSkills);
             score.add(tempScore);
             skills.add(tempSkills);
         }
@@ -262,7 +262,7 @@ public class Player implements matchup.sim.Player {
         }
         double max = Collections.max(ratio);
         int index = ratio.indexOf(max);
-        //System.out.println(index);
+        ////System.out.println(index);
         return index;
     }
 
@@ -297,15 +297,15 @@ public class Player implements matchup.sim.Player {
 
         // Get history of games.
         // List<Game> games = History.getHistory();
-        // System.out.println("game no: " + games.size());
+        // //System.out.println("game no: " + games.size());
 
         // int sz = games.size();
 
         // for (int i = 0; i < sz; i++) {
         //     System.out.print(games.get(i).playerA.name + ": ");
-        //     System.out.println(games.get(i).playerA.distribution);
+        //     //System.out.println(games.get(i).playerA.distribution);
         //     System.out.print(games.get(i).playerB.name + ": ");
-        //     System.out.println(games.get(i).playerB.distribution);
+        //     //System.out.println(games.get(i).playerB.distribution);
         // } 
     }
 
@@ -317,7 +317,7 @@ public class Player implements matchup.sim.Player {
             System.out.print(myList.get(i) + ", ");
         }
         System.out.print(myList.get(myList.size() - 1));
-        System.out.println("]");
+        //System.out.println("]");
     }
 
     private void printListDouble(List<Double> myList) {
@@ -326,7 +326,7 @@ public class Player implements matchup.sim.Player {
             System.out.print(myList.get(i) + ", ");
         }
         System.out.print(myList.get(myList.size() - 1));
-        System.out.println("]");
+        //System.out.println("]");
     }
 
     private void print2DList(List<List<Integer>> my2DList) {
@@ -337,7 +337,7 @@ public class Player implements matchup.sim.Player {
         }
         System.out.print("  ");
         printList(my2DList.get(my2DList.size() - 1));
-        System.out.println("\n]");
+        //System.out.println("\n]");
     }
 
     private void permute(List<Integer> myList, int l, int r, List<List<Integer>> result) {
